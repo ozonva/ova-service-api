@@ -1,3 +1,4 @@
+### Go ###
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -13,3 +14,24 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+### Intellij ###
+.idea/*
+
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+### Artifacts ###
+# Output directories
+out/*
+dist/*
