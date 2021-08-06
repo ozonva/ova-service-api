@@ -51,3 +51,34 @@ func InvertMap(originalMap map[string]int) map[int]string {
 
 	return result
 }
+
+func FilterSlice(slice []string, filter []string) []string {
+	if slice == nil {
+		return nil
+	}
+
+	var result []string
+
+	if len(filter) == 0 {
+		result = make([]string, len(slice))
+		copy(result, slice)
+		return result
+	}
+
+	// Convert filter slice to map to achieve effective search against filter:
+	// O(n) to build filterMap and then O(1) search time complexity.
+	filterMap := make(map[string]bool, len(filter))
+	for _, filteredWord := range filter {
+		filterMap[filteredWord] = true
+	}
+
+	for _, word := range slice {
+		if _, ok := filterMap[word]; ok {
+			continue
+		}
+
+		result = append(result, word)
+	}
+
+	return result
+}

@@ -111,3 +111,49 @@ func TestInvertMap_WhenOriginalMapIsNil_ThenShouldReturnNil(t *testing.T) {
 
 	assert.Nil(t, got, "Nil result should be returned")
 }
+
+////////////////////////////
+// FilterSlice tests      //
+////////////////////////////
+func TestFilterSlice_WhenOriginalSliceHaveSomethingToFilter_ThenShouldReturnNewSliceWithoutFilteredValues(t *testing.T) {
+	slice := []string{"bar", "baz", "foo"}
+	filter := []string{"foo"}
+
+	got := FilterSlice(slice, filter)
+
+	assert.EqualValues(t, []string{"bar", "baz"}, got, "Result slice values are incorrect")
+}
+
+func TestFilterSlice_WhenOriginalSliceDoesNotIntersectWithFilterValues_ThenShouldReturnCopyOfTheSlice(t *testing.T) {
+	slice := []string{"bar", "baz"}
+	filter := []string{"foo"}
+
+	got := FilterSlice(slice, filter)
+
+	assert.False(t, &slice == &got, "Copy of the slice should be returned, not the original slice")
+	assert.EqualValues(t, []string{"bar", "baz"}, got, "Original and result slice should contain the same values")
+}
+
+func TestFilterSlice_WhenOriginalSliceIsNil_ThenShouldReturnNil(t *testing.T) {
+	var slice []string = nil
+	filter := []string{"foo"}
+
+	got := FilterSlice(slice, filter)
+
+	assert.Nil(t, got, "Nil result should be returned")
+}
+
+func TestFilterSlice_WhenFilterIsNilOrEmpty_ThenShouldReturnCopyOfTheSlice(t *testing.T) {
+	slice := []string{"bar", "baz"}
+	filters := [][]string{
+		nil,
+		make([]string, 0),
+	}
+
+	for _, filter := range filters {
+		got := FilterSlice(slice, filter)
+
+		assert.False(t, &slice == &got, "Copy of the slice should be returned, not the original slice")
+		assert.EqualValues(t, []string{"bar", "baz"}, got, "Original and result slice should contain the same values")
+	}
+}
