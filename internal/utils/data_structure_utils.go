@@ -10,19 +10,19 @@ func GetSliceChunks(slice []int, chunkSize int) ([][]int, error) {
 		return nil, fmt.Errorf("chunkSize argument value must be positive")
 	}
 
-	n := len(slice)
-	if n == 0 {
+	sliceLen := len(slice)
+	if sliceLen == 0 {
 		return make([][]int, 0), nil
 	}
 
-	chunkCount := int(math.Ceil(float64(n) / float64(chunkSize)))
+	chunkCount := int(math.Ceil(float64(sliceLen) / float64(chunkSize)))
 	result := make([][]int, chunkCount)
 	k := 0
 
-	for i := 0; i < n; i += chunkSize {
+	for i := 0; i < sliceLen; i += chunkSize {
 		size := i + chunkSize
 
-		if size <= n {
+		if size < sliceLen {
 			result[k] = slice[i:size]
 		} else {
 			result[k] = slice[i:]
