@@ -33,3 +33,13 @@ func GetSliceChunks(slice []int, chunkSize int) ([][]int, error) {
 
 	return result, nil
 }
+
+func InvertMap(originalMap map[string]int) map[int]string {
+	result := make(map[int]string, len(originalMap))
+
+	for key, val := range originalMap {
+		result[val] = key
+	}
+
+	return result
+}

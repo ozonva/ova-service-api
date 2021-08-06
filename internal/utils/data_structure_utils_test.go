@@ -60,7 +60,34 @@ func TestGetSliceChunks_WhenChunkSizeIsZeroOrNegative_ThenShouldReturnError(t *t
 
 	for _, chunkSize := range chunkSizes {
 		got, err := GetSliceChunks(slice, chunkSize)
+
 		assert.Nil(t, got, "Should not return slice when error occurs")
 		assert.Errorf(t, err, "chunkSize argument value must be positive", "Error with proper message should be returned")
 	}
+}
+
+////////////////////////////
+// InvertMap tests       //
+////////////////////////////
+func TestInvertMap_WhenMapContainsValues_ThenShouldReturnInvertedMap(t *testing.T) {
+	originalMap := map[string]int{
+		"foo": 1,
+		"bar": 2,
+	}
+
+	got := InvertMap(originalMap)
+
+	assert.Equal(t, 2, len(got), "Inverted map length should be equal original map length")
+	assert.Contains(t, got, 1, "Inverted map should contains key = 1")
+	assert.Equal(t, got[1], "foo", "Inverted map should keep value \"foo\" for key = 1")
+	assert.Contains(t, got, 2, "Inverted map should contains key = 2")
+	assert.Equal(t, got[2], "bar", "Inverted map should keep value \"bar\" for key = 2")
+}
+
+func TestInvertMap_WhenMapContainsZeroElements_ThenShouldReturnEmptyMap(t *testing.T) {
+	originalMap := make(map[string]int)
+
+	got := InvertMap(originalMap)
+
+	assert.Empty(t, got, "Inverted map should be empty")
 }
