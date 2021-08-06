@@ -1,6 +1,7 @@
 .PHONY: build, format, lint, release, run, test
 
 build:
+	go mod tidy
 	go build -o ./bin/ ./cmd/ova-service-api
 
 format:
