@@ -6,6 +6,10 @@ import (
 )
 
 func GetSliceChunks(slice []int, chunkSize int) ([][]int, error) {
+	if slice == nil {
+		return nil, fmt.Errorf("original slice doesn't exist")
+	}
+
 	if chunkSize <= 0 {
 		return nil, fmt.Errorf("chunkSize argument value must be positive")
 	}
@@ -35,6 +39,10 @@ func GetSliceChunks(slice []int, chunkSize int) ([][]int, error) {
 }
 
 func InvertMap(originalMap map[string]int) map[int]string {
+	if originalMap == nil {
+		return nil
+	}
+
 	result := make(map[int]string, len(originalMap))
 
 	for key, val := range originalMap {
