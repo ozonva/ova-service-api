@@ -70,9 +70,9 @@ func FilterSlice(slice []string, filter []string) []string {
 
 	// Convert filter slice to map to achieve effective search against filter:
 	// O(n) to build filterMap and then O(1) search time complexity.
-	filterMap := make(map[string]bool, len(filter))
+	filterMap := make(map[string]struct{}, len(filter))
 	for _, filteredWord := range filter {
-		filterMap[filteredWord] = true
+		filterMap[filteredWord] = struct{}{}
 	}
 
 	for _, word := range slice {
