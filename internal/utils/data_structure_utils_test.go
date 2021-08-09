@@ -4,7 +4,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+const getSliceChunksEmptyErrorMsg = "No error should be returned for positive chunkSize"
 
 ////////////////////////////
 // GetSliceChunks tests   //
@@ -15,8 +18,8 @@ func TestGetSliceChunks_WhenLengthIsMultipleBySize_ThenShouldReturnEqualChunks(t
 
 	got, err := GetSliceChunks(slice, chunkSize)
 
-	assert.Nil(t, err, "No error should be returned for positive chunkSize")
-	assert.Equal(t, 2, len(got), "The result slice should contain two items")
+	assert.Nil(t, err, getSliceChunksEmptyErrorMsg)
+	require.Equal(t, 2, len(got), "The result slice should contain two items")
 	assert.EqualValues(t, []int{1, 2}, got[0], "The first chunk contains incorrect values")
 	assert.EqualValues(t, []int{3, 4}, got[1], "The second chunk contains incorrect values")
 }
@@ -27,8 +30,8 @@ func TestGetSliceChunks_WhenLengthIsNotMultipleBySize_ThenLastChunkShouldBeTheSm
 
 	got, err := GetSliceChunks(slice, chunkSize)
 
-	assert.Nil(t, err, "No error should be returned for positive chunkSize")
-	assert.Equal(t, len(got), 2, "The result slice should contain two items")
+	assert.Nil(t, err, getSliceChunksEmptyErrorMsg)
+	require.Equal(t, len(got), 2, "The result slice should contain two items")
 	assert.EqualValues(t, []int{1, 2, 3}, got[0], "The first chunk contains incorrect values")
 	assert.EqualValues(t, []int{4, 5}, got[1], "The second chunk contains incorrect values")
 }
@@ -39,7 +42,7 @@ func TestGetSliceChunks_WhenSliceIsEmpty_ThenShouldReturnEmptySlice(t *testing.T
 
 	got, err := GetSliceChunks(slice, chunkSize)
 
-	assert.Nil(t, err, "No error should be returned for positive chunkSize")
+	assert.Nil(t, err, getSliceChunksEmptyErrorMsg)
 	assert.Equal(t, 0, len(got), "The result slice should have zero length")
 }
 
@@ -49,8 +52,8 @@ func TestGetSliceChunks_WhenChunkSizeIsGreaterSliceLength_ThenShouldReturnSingle
 
 	got, err := GetSliceChunks(slice, chunkSize)
 
-	assert.Nil(t, err, "No error should be returned for positive chunkSize")
-	assert.Equal(t, 1, len(got), "The result slice should have single item")
+	assert.Nil(t, err, getSliceChunksEmptyErrorMsg)
+	require.Equal(t, 1, len(got), "The result slice should have single item")
 	assert.EqualValues(t, []int{1, 2, 3}, got[0], "The first chunk contains incorrect values")
 }
 
@@ -61,7 +64,7 @@ func TestGetSliceChunks_WhenSliceIsNil_ThenShouldReturnError(t *testing.T) {
 	got, err := GetSliceChunks(slice, chunkSize)
 
 	assert.Nil(t, got, "Should not return slice when error occurs")
-	assert.Errorf(t, err, "Error should be returned")
+	require.Errorf(t, err, "Error should be returned")
 	assert.Equal(t, "original slice doesn't exist", err.Error(), "Incorrect error message")
 }
 
@@ -73,7 +76,7 @@ func TestGetSliceChunks_WhenChunkSizeIsZeroOrNegative_ThenShouldReturnError(t *t
 		got, err := GetSliceChunks(slice, chunkSize)
 
 		assert.Nil(t, got, "Should not return slice when error occurs")
-		assert.Errorf(t, err, "Error should be returned")
+		require.Errorf(t, err, "Error should be returned")
 		assert.Equal(t, "chunkSize argument value must be positive", err.Error(), "Incorrect error message")
 	}
 }
@@ -90,7 +93,7 @@ func TestInvertMap_WhenMapContainsValues_ThenShouldReturnInvertedMap(t *testing.
 	got, err := InvertMap(originalMap)
 
 	assert.Nil(t, err, "No error should be returned for valid original map")
-	assert.Equal(t, 2, len(got), "Inverted map length should be equal original map length")
+	require.Equal(t, 2, len(got), "Inverted map length should be equal original map length")
 	assert.Contains(t, got, 1, "Inverted map should contains key = 1")
 	assert.Equal(t, got[1], "foo", "Inverted map should keep value \"foo\" for key = 1")
 	assert.Contains(t, got, 2, "Inverted map should contains key = 2")
@@ -125,7 +128,7 @@ func TestInvertMap_WhenMapContainsSameValueForMultipleKeys_ThenShouldReturnError
 	got, err := InvertMap(originalMap)
 
 	assert.Nil(t, got, "No result should be returned when error occurs")
-	assert.Errorf(t, err, "Error should be returned")
+	require.Errorf(t, err, "Error should be returned")
 	assert.Equal(t, "inverted key collision. Multiple keys in the original map maps to the same value \"2\". Can't invert the map",
 		err.Error(), "Incorrect error message")
 
@@ -149,7 +152,6 @@ func TestFilterSlice_WhenOriginalSliceDoesNotIntersectWithFilterValues_ThenShoul
 
 	got := FilterSlice(slice, filter)
 
-	assert.False(t, &slice == &got, "Copy of the slice should be returned, not the original slice")
 	assert.EqualValues(t, []string{"bar", "baz"}, got, "Original and result slice should contain the same values")
 }
 
