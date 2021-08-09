@@ -87,8 +87,9 @@ func TestInvertMap_WhenMapContainsValues_ThenShouldReturnInvertedMap(t *testing.
 		"bar": 2,
 	}
 
-	got := InvertMap(originalMap)
+	got, err := InvertMap(originalMap)
 
+	assert.Nil(t, err, "No error should be returned for valid original map")
 	assert.Equal(t, 2, len(got), "Inverted map length should be equal original map length")
 	assert.Contains(t, got, 1, "Inverted map should contains key = 1")
 	assert.Equal(t, got[1], "foo", "Inverted map should keep value \"foo\" for key = 1")
@@ -99,17 +100,35 @@ func TestInvertMap_WhenMapContainsValues_ThenShouldReturnInvertedMap(t *testing.
 func TestInvertMap_WhenMapContainsZeroElements_ThenShouldReturnEmptyMap(t *testing.T) {
 	originalMap := make(map[string]int)
 
-	got := InvertMap(originalMap)
+	got, err := InvertMap(originalMap)
 
+	assert.Nil(t, err, "No error should be returned for empty original map")
 	assert.Empty(t, got, "Inverted map should be empty")
 }
 
 func TestInvertMap_WhenOriginalMapIsNil_ThenShouldReturnNil(t *testing.T) {
 	var originalMap map[string]int = nil
 
-	got := InvertMap(originalMap)
+	got, err := InvertMap(originalMap)
 
+	assert.Nil(t, err, "No error should be returned when original map doesn't exist")
 	assert.Nil(t, got, "Nil result should be returned")
+}
+
+func TestInvertMap_WhenMapContainsSameValueForMultipleKeys_ThenShouldReturnError(t *testing.T) {
+	originalMap := map[string]int{
+		"foo": 1,
+		"bar": 2,
+		"baz": 2,
+	}
+
+	got, err := InvertMap(originalMap)
+
+	assert.Nil(t, got, "No result should be returned when error occurs")
+	assert.Errorf(t, err, "Error should be returned")
+	assert.Equal(t, "inverted key collision. Multiple keys in the original map maps to the same value \"2\". Can't invert the map",
+		err.Error(), "Incorrect error message")
+
 }
 
 ////////////////////////////

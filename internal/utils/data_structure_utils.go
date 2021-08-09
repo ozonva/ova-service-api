@@ -38,18 +38,21 @@ func GetSliceChunks(slice []int, chunkSize int) ([][]int, error) {
 	return result, nil
 }
 
-func InvertMap(originalMap map[string]int) map[int]string {
+func InvertMap(originalMap map[string]int) (map[int]string, error) {
 	if originalMap == nil {
-		return nil
+		return nil, nil
 	}
 
 	result := make(map[int]string, len(originalMap))
 
 	for key, val := range originalMap {
+		if _, ok := result[val]; ok {
+			return nil, fmt.Errorf("inverted key collision. Multiple keys in the original map maps to the same value \"%d\". Can't invert the map", val)
+		}
 		result[val] = key
 	}
 
-	return result
+	return result, nil
 }
 
 func FilterSlice(slice []string, filter []string) []string {
