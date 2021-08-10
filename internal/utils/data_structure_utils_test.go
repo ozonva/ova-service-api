@@ -174,7 +174,6 @@ func TestFilterSlice_WhenFilterIsNilOrEmpty_ThenShouldReturnCopyOfTheSlice(t *te
 	for _, filter := range filters {
 		got := FilterSlice(slice, filter)
 
-		assert.False(t, &slice == &got, "Copy of the slice should be returned, not the original slice")
 		assert.EqualValues(t, []string{"bar", "baz"}, got, "Original and result slice should contain the same values")
 	}
 }
