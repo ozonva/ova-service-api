@@ -33,5 +33,6 @@
 
 ### Artifacts ###
 # Output directories
-out/*
-dist/*
+bin/
+dist/
+out/
