@@ -45,9 +45,12 @@ func TestService_WhenEmptyUserID_ShouldReturnError(t *testing.T) {
 }
 
 func TestService_WhenProvidedDateInThePast_ShouldReturnError(t *testing.T) {
-	got, err := New(1, "description", "name", "address", &yesterdayLocal)
+	got := Service{
+		ID: uuid.New(),
+	}
 
-	assert.Nil(t, got, "Service should not be created on error")
+	err := got.UpdateCalendar(&yesterdayLocal)
+
 	require.Errorf(t, err, "Error should be returned")
 	assert.Equal(t, "can't update calendar to the date in the past",
 		err.Error(), "Incorrect error message")
