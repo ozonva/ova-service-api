@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -60,4 +61,50 @@ func TestSplitToBulks_WhenChunkSizeIsZero_ThenShouldReturnError(t *testing.T) {
 	assert.Nil(t, got, "Should not return slice when error occurs")
 	require.Errorf(t, err, "Error should be returned")
 	assert.Equal(t, "batchSize argument value must be positive", err.Error(), "Incorrect error message")
+}
+
+////////////////////////////
+// ServicesToMap tests    //
+////////////////////////////
+
+func TestServicesToMap_WhenValidServicesSlice_ThenShouldReturnMap(t *testing.T) {
+	got, err := ServicesToMap(services[:2])
+
+	assert.Nil(t, err, "No error should be returned for valid service slice")
+	require.Equal(t, 2, len(got), "Map length should be equal services length")
+	serviceZeroID := services[0].ID.String()
+	assert.Contains(t, got, serviceZeroID, "Key is missed in the map")
+	assert.Equal(t, got[serviceZeroID], services[0], "Value is incorrect")
+	serviceOneID := services[1].ID.String()
+	assert.Contains(t, got, serviceOneID, "Key is missed in the map")
+	assert.Equal(t, got[serviceOneID], services[1], "Value is incorrect")
+}
+
+func TestServicesToMap_WhenServicesIsEmptyOrNil_ThenShouldReturnEmptyMap(t *testing.T) {
+	emptyServices := [][]domain.Service{
+		make([]domain.Service, 0),
+		nil,
+	}
+
+	for _, emptyService := range emptyServices {
+		got, err := ServicesToMap(emptyService)
+
+		assert.Nil(t, err, "No error should be returned for empty service slice")
+		assert.Empty(t, got, "Map should be empty")
+	}
+}
+
+func TestServicesToMap_WhenServicesContainDuplicates_ThenShouldReturnError(t *testing.T) {
+	duplicateServiceID := uuid.New()
+	servicesWithDuplicates := []domain.Service{
+		{ID: duplicateServiceID},
+		{ID: duplicateServiceID},
+	}
+
+	got, err := ServicesToMap(servicesWithDuplicates)
+
+	assert.Nil(t, got, "No result should be returned when error occurs")
+	require.Errorf(t, err, "Error should be returned")
+	expected := fmt.Sprintf("key collision. Service with ID \"%s\" already present in the map", duplicateServiceID.String())
+	assert.Equal(t, expected, err.Error(), "Incorrect error message")
 }
