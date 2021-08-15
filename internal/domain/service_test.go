@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -50,4 +51,29 @@ func TestService_WhenProvidedDateInThePast_ShouldReturnError(t *testing.T) {
 	require.Errorf(t, err, "Error should be returned")
 	assert.Equal(t, "can't update calendar to the date in the past",
 		err.Error(), "Incorrect error message")
+}
+
+func TestService_ShouldBeAbleToPrintItself(t *testing.T) {
+	service := Service{
+		ID:             uuid.MustParse("85ae1287-9dc8-4e4a-9214-35c3debbdfba"),
+		UserID:         1,
+		Description:    "TO 123",
+		ServiceName:    "Best TO ever",
+		ServiceAddress: "In the middle of nowhere",
+		WhenLocal:      &tomorrowLocal,
+		WhenUTC:        &tomorrowUTC,
+	}
+
+	got := service.String()
+
+	expected := fmt.Sprintf(`Service entry:
+	ID: 			85ae1287-9dc8-4e4a-9214-35c3debbdfba
+	UserID: 		1
+	Description: 	TO 123
+	ServiceName: 	Best TO ever
+	ServiceAddress: In the middle of nowhere
+	WhenLocal: 		%v
+	WhenUTC: 		%v
+`, service.WhenLocal, service.WhenUTC)
+	assert.Equal(t, expected, got, "Service printed itself in the wrong format")
 }

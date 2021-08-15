@@ -65,3 +65,28 @@ func (service *Service) UpdateCalendar(when *time.Time) error {
 
 	return nil
 }
+
+func (service *Service) String() string {
+	var (
+		local time.Time
+		utc   time.Time
+	)
+
+	if service.WhenLocal != nil {
+		local = *service.WhenLocal
+	}
+
+	if service.WhenUTC != nil {
+		utc = *service.WhenUTC
+	}
+
+	return fmt.Sprintf(`Service entry:
+	ID: 			%v
+	UserID: 		%d
+	Description: 	%s
+	ServiceName: 	%s
+	ServiceAddress: %s
+	WhenLocal: 		%v
+	WhenUTC: 		%v
+`, service.ID, service.UserID, service.Description, service.ServiceName, service.ServiceAddress, local, utc)
+}
