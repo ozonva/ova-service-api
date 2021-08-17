@@ -7,36 +7,37 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	configFileWithPath    = "testdata/test_config_with_path.txt"
+	configFileTwoIntegers = "testdata/test_config_with_two_integers.txt"
+	nonExistingFile       = "testdata/non_existent_file.txt"
+)
+
 func TestReadConfigFile_WhenExistingFilenameIsProvided_ShouldReadFileData(t *testing.T) {
-	filename := "testdata/test_config_1.txt"
+	got, err := ReadConfigFile(configFileWithPath)
 
-	got, err := ReadConfigFile(filename)
-
-	assert.Nil(t, err, "No error should be returned for valid filename")
+	require.NoError(t, err, "No error should be returned for valid filename")
 	assert.Equal(t, "path = \"$HOME/app\"\n", string(got), "The file was not read properly")
 }
 
 func TestReadConfigFile_WhenWrongFilenameIsProvided_ShouldReturnError(t *testing.T) {
-	filename := "testdata/wrong_filename.txt"
+	_, err := ReadConfigFile(nonExistingFile)
 
-	got, err := ReadConfigFile(filename)
-
-	assert.Nil(t, got, "No result should be returned when error occurs")
 	require.Errorf(t, err, "Error should be returned")
-	assert.Equal(t, "open testdata/wrong_filename.txt: no such file or directory",
+	assert.Equal(t, "open testdata/non_existent_file.txt: no such file or directory",
 		err.Error(), "Incorrect error message")
 }
 
 func TestReadMultipleConfigFiles_WhenExistingFilenamesAreProvided_ShouldReadAllFileData(t *testing.T) {
 	filenames := []string{
-		"testdata/test_config_1.txt",
-		"testdata/test_config_2.txt",
+		configFileWithPath,
+		configFileTwoIntegers,
 	}
 
 	data, err := ReadMultipleConfigFiles(filenames)
 	got := convertBytesToStrings(data)
 
-	assert.Nil(t, err, "No error should be returned for valid filenames")
+	require.NoError(t, err, "No error should be returned for valid filenames")
 	expected := []string{
 		"path = \"$HOME/app\"\n",
 		"a = 1\nb = 2\n",
@@ -46,15 +47,14 @@ func TestReadMultipleConfigFiles_WhenExistingFilenamesAreProvided_ShouldReadAllF
 
 func TestReadMultipleConfigFiles_WhenErrorOccursDuringFileProcessing_ShouldReturnError(t *testing.T) {
 	filenames := []string{
-		"testdata/wrong_filename.txt",
-		"testdata/test_config_2.txt",
+		nonExistingFile,
+		configFileWithPath,
 	}
 
-	got, err := ReadMultipleConfigFiles(filenames)
+	_, err := ReadMultipleConfigFiles(filenames)
 
-	assert.Nil(t, got, "No result should be returned when error occurs")
 	require.Errorf(t, err, "Error should be returned")
-	assert.Equal(t, "open testdata/wrong_filename.txt: no such file or directory",
+	assert.Equal(t, "open testdata/non_existent_file.txt: no such file or directory",
 		err.Error(), "Incorrect error message")
 }
 
