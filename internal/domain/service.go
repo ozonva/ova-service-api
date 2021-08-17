@@ -17,7 +17,7 @@ type Service struct {
 	WhenUTC        *time.Time
 }
 
-func New(userID uint64, description string, serviceName string, serviceAddress string, when *time.Time) (*Service, error) {
+func NewService(userID uint64, description string, serviceName string, serviceAddress string, when *time.Time) (*Service, error) {
 	if userID == 0 {
 		return nil, fmt.Errorf("can't create service entry for non-existing user")
 	}

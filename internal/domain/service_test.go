@@ -17,9 +17,9 @@ var (
 )
 
 func TestService_WhenValidArguments_ShouldCreateNewService(t *testing.T) {
-	got, err := New(1, "description", "name", "address", &tomorrowLocal)
+	got, err := NewService(1, "description", "name", "address", &tomorrowLocal)
 
-	assert.Nil(t, err, "No error should be returned for valid arguments")
+	require.NoError(t, err, "No error should be returned for valid arguments")
 	require.NotNil(t, got, "Valid Service structure should be created")
 	assert.NotEqual(t, uuid.Nil, got.ID, "Non-empty ID should be generated")
 	assert.True(t, tomorrowLocal.Equal(*got.WhenLocal), "Local date should be set properly")
@@ -27,18 +27,17 @@ func TestService_WhenValidArguments_ShouldCreateNewService(t *testing.T) {
 }
 
 func TestService_WhenEmptyCalendar_ShouldCreateNewServiceWithEmptyCalendar(t *testing.T) {
-	got, err := New(1, "description", "name", "address", nil)
+	got, err := NewService(1, "description", "name", "address", nil)
 
-	assert.Nil(t, err, "No error should be returned for valid arguments")
+	require.NoError(t, err, "No error should be returned for valid arguments")
 	require.NotNil(t, got, "Valid Service structure should be created")
 	assert.Nil(t, got.WhenLocal, "Local date should be nil")
 	assert.Nil(t, got.WhenUTC, "UTC date should be nil")
 }
 
 func TestService_WhenEmptyUserID_ShouldReturnError(t *testing.T) {
-	got, err := New(0, "description", "name", "address", nil)
+	_, err := NewService(0, "description", "name", "address", nil)
 
-	assert.Nil(t, got, "Service should not be created on error")
 	require.Errorf(t, err, "Error should be returned")
 	assert.Equal(t, "can't create service entry for non-existing user",
 		err.Error(), "Incorrect error message")
