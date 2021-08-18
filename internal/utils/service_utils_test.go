@@ -5,12 +5,12 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/ozonva/ova-service-api/internal/domain"
+	"github.com/ozonva/ova-service-api/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var services = []domain.Service{
+var services = []models.Service{
 	{ID: uuid.New()},
 	{ID: uuid.New()},
 	{ID: uuid.New()},
@@ -33,7 +33,7 @@ func TestSplitToBulks_WhenLenIsGreaterThanBatchSize_ThenShouldReturnSeveralBatch
 }
 
 func TestSplitToBulks_WhenSliceIsEmpty_ThenShouldReturnEmptySlice(t *testing.T) {
-	slice := make([]domain.Service, 0)
+	slice := make([]models.Service, 0)
 	batchSize := uint(1)
 
 	got, err := SplitToBulks(slice, batchSize)
@@ -43,7 +43,7 @@ func TestSplitToBulks_WhenSliceIsEmpty_ThenShouldReturnEmptySlice(t *testing.T) 
 }
 
 func TestSplitToBulks_WhenSliceIsNil_ThenShouldReturnError(t *testing.T) {
-	var slice []domain.Service = nil
+	var slice []models.Service = nil
 	batchSize := uint(1)
 
 	_, err := SplitToBulks(slice, batchSize)
@@ -79,8 +79,8 @@ func TestServicesToMap_WhenValidServicesSlice_ThenShouldReturnMap(t *testing.T) 
 }
 
 func TestServicesToMap_WhenServicesIsEmptyOrNil_ThenShouldReturnEmptyMap(t *testing.T) {
-	emptyServices := [][]domain.Service{
-		make([]domain.Service, 0),
+	emptyServices := [][]models.Service{
+		make([]models.Service, 0),
 		nil,
 	}
 
@@ -94,7 +94,7 @@ func TestServicesToMap_WhenServicesIsEmptyOrNil_ThenShouldReturnEmptyMap(t *test
 
 func TestServicesToMap_WhenServicesContainDuplicates_ThenShouldReturnError(t *testing.T) {
 	duplicateServiceID := uuid.New()
-	servicesWithDuplicates := []domain.Service{
+	servicesWithDuplicates := []models.Service{
 		{ID: duplicateServiceID},
 		{ID: duplicateServiceID},
 	}
