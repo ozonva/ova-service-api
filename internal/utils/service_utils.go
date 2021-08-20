@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/ozonva/ova-service-api/internal/domain"
+	"github.com/ozonva/ova-service-api/internal/models"
 )
 
-func SplitToBulks(services []domain.Service, batchSize uint) ([][]domain.Service, error) {
+func SplitToBulks(services []models.Service, batchSize uint) ([][]models.Service, error) {
 	if services == nil {
 		return nil, fmt.Errorf("original slice doesn't exist")
 	}
@@ -18,11 +18,11 @@ func SplitToBulks(services []domain.Service, batchSize uint) ([][]domain.Service
 
 	sliceLen := uint(len(services))
 	if sliceLen == 0 {
-		return make([][]domain.Service, 0), nil
+		return make([][]models.Service, 0), nil
 	}
 
 	batchCount := int(math.Ceil(float64(sliceLen) / float64(batchSize)))
-	result := make([][]domain.Service, batchCount)
+	result := make([][]models.Service, batchCount)
 	k := 0
 
 	for i := uint(0); i < sliceLen; i += batchSize {
@@ -40,8 +40,8 @@ func SplitToBulks(services []domain.Service, batchSize uint) ([][]domain.Service
 	return result, nil
 }
 
-func ServicesToMap(services []domain.Service) (map[string]domain.Service, error) {
-	result := make(map[string]domain.Service, len(services))
+func ServicesToMap(services []models.Service) (map[string]models.Service, error) {
+	result := make(map[string]models.Service, len(services))
 
 	for _, service := range services {
 		serviceID := service.ID.String()

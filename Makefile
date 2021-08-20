@@ -1,4 +1,4 @@
-.PHONY: build, format, lint, release, run, test
+.PHONY: build, format, lint, release, run, test, generate
 
 build:
 	go mod tidy
@@ -13,7 +13,10 @@ lint:
 test:
 	go test -v ./...
 
-release: format lint test build
+generate:
+	go generate ./...
+
+release: format lint generate test build
 
 run:
 	go run ./cmd/ova-service-api
