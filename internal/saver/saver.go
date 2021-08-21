@@ -9,6 +9,8 @@ import (
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
 )
 
+const sleepTime = 100 * time.Millisecond
+
 type Saver interface {
 	Save(service models.Service)
 	Init()
@@ -59,7 +61,7 @@ func (s *saver) Init() {
 					return
 				}
 			default:
-				time.Sleep(100 * time.Millisecond)
+				time.Sleep(sleepTime)
 			}
 		}
 	}(s.signalChannel)
