@@ -1,23 +1,25 @@
 package saver
 
 import (
+	"fmt"
+	"log"
 	"sync"
 	"time"
 
 	"github.com/ozonva/ova-service-api/internal/models"
-
-	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
 )
 
-const sleepTime = 100 * time.Millisecond
+type Flusher interface {
+	Flush(services []models.Service) []models.Service
+}
 
 type Saver interface {
-	Save(service models.Service)
+	Save(service models.Service) error
 	Init()
 	Close()
 }
 
-func New(capacity uint, flushTimeout time.Duration, flusher flusher_.Flusher) Saver {
+func New(capacity uint, flushTimeout time.Duration, flusher Flusher) Saver {
 	return &saver{
 		localStorage: make([]models.Service, 0, capacity),
 		flushTimeout: flushTimeout,
@@ -30,15 +32,19 @@ type saver struct {
 	signalChannel chan struct{}
 	localStorage  []models.Service
 	flushTimeout  time.Duration
-	flusher       flusher_.Flusher
+	flusher       Flusher
 }
 
-func (s *saver) Save(service models.Service) {
-	// If our local storage is full we are force flush our data, free up the localStorage and add new service to it.
+func (s *saver) Save(service models.Service) error {
+	s.Lock()
+	defer s.Unlock()
+
 	if len(s.localStorage) == cap(s.localStorage) {
-		s.flush()
+		return fmt.Errorf("local storage is full, please wait for the next flash operation")
 	}
+
 	s.localStorage = append(s.localStorage, service)
+	return nil
 }
 
 func (s *saver) Init() {
@@ -60,8 +66,6 @@ func (s *saver) Init() {
 					s.flush()
 					return
 				}
-			default:
-				time.Sleep(sleepTime)
 			}
 		}
 	}(s.signalChannel)
@@ -77,11 +81,14 @@ func (s *saver) flush() {
 	s.Lock()
 	defer s.Unlock()
 
-	// Flush some data to storage could be potentially long operation.
-	// We will run it asynchronously and free up localStorage immediately.
-	go func(services []models.Service) {
-		_ = s.flusher.Flush(services)
-	}(s.localStorage)
+	if len(s.localStorage) == 0 {
+		return
+	}
+
+	unsaved := s.flusher.Flush(s.localStorage)
+	if len(unsaved) > 0 {
+		log.Printf("warning: some entities can't be saved to database and will be discraded: \n%v\n", unsaved)
+	}
 
 	s.localStorage = make([]models.Service, 0, cap(s.localStorage))
 }

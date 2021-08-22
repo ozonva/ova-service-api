@@ -6,6 +6,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
 	"github.com/ozonva/ova-service-api/internal/mocks"
 	"github.com/ozonva/ova-service-api/internal/models"
@@ -50,20 +51,19 @@ var _ = Describe("Saver", func() {
 
 					flusherMock.EXPECT().Flush(gomock.Any()).Times(0)
 
-					saver.Save(carService)
+					_ = saver.Save(carService)
 				})
 			})
 
 			When("local storage is full", func() {
-				It("should flush before save new service", func() {
+				It("should return error", func() {
 					saver := saver_.New(1, longTimeout, flusherMock)
 					saver.Init()
 
-					flusherMock.EXPECT().Flush(gomock.Eq([]models.Service{carService})).Times(1)
-					flusherMock.EXPECT().Flush(gomock.Eq([]models.Service{panzerService})).Times(0)
+					flusherMock.EXPECT().Flush(gomock.Eq(gomock.Any())).Times(0)
 
-					saver.Save(carService)
-					saver.Save(panzerService)
+					_ = saver.Save(carService)
+					Expect(saver.Save(panzerService)).Should(HaveOccurred())
 				})
 			})
 		})
@@ -75,7 +75,7 @@ var _ = Describe("Saver", func() {
 
 				flusherMock.EXPECT().Flush(gomock.Eq([]models.Service{carService})).Times(1)
 
-				saver.Save(carService)
+				_ = saver.Save(carService)
 				time.Sleep(shortTimeout)
 			})
 		})
@@ -87,7 +87,7 @@ var _ = Describe("Saver", func() {
 
 				flusherMock.EXPECT().Flush(gomock.Eq([]models.Service{carService})).Times(1)
 
-				saver.Save(carService)
+				_ = saver.Save(carService)
 				saver.Close()
 			})
 		})
