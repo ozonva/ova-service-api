@@ -63,7 +63,6 @@ func (s *saver) Init() {
 				s.flush()
 			case _, ok := <-ch:
 				if !ok {
-					s.flush()
 					return
 				}
 			}
@@ -72,6 +71,7 @@ func (s *saver) Init() {
 }
 
 func (s *saver) Close() {
+	s.flush()
 	close(s.signalChannel)
 }
 
