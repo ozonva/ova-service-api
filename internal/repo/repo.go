@@ -1,9 +1,14 @@
 package repo
 
-import "github.com/ozonva/ova-service-api/internal/models"
+import (
+	"github.com/google/uuid"
+
+	"github.com/ozonva/ova-service-api/internal/models"
+)
 
 type Repo interface {
-	AddServices(entities []models.Service) error
-	ListServices(limit, offset uint64) ([]models.Service, error)
-	DescribeService(entityId uint64) (*models.Service, error)
+	AddServices(services []models.Service) error
+	ListServices(limit uint64, offset uint64) ([]models.Service, error)
+	DescribeService(serviceID uuid.UUID) (*models.Service, error)
+	RemoveService(serviceID uuid.UUID) error
 }

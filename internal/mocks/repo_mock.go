@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 	models "github.com/ozonva/ova-service-api/internal/models"
 )
 
@@ -49,7 +50,7 @@ func (mr *MockRepoMockRecorder) AddServices(arg0 interface{}) *gomock.Call {
 }
 
 // DescribeService mocks base method.
-func (m *MockRepo) DescribeService(arg0 uint64) (*models.Service, error) {
+func (m *MockRepo) DescribeService(arg0 uuid.UUID) (*models.Service, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DescribeService", arg0)
 	ret0, _ := ret[0].(*models.Service)
@@ -76,4 +77,18 @@ func (m *MockRepo) ListServices(arg0, arg1 uint64) ([]models.Service, error) {
 func (mr *MockRepoMockRecorder) ListServices(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListServices", reflect.TypeOf((*MockRepo)(nil).ListServices), arg0, arg1)
+}
+
+// RemoveService mocks base method.
+func (m *MockRepo) RemoveService(arg0 uuid.UUID) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveService", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveService indicates an expected call of RemoveService.
+func (mr *MockRepoMockRecorder) RemoveService(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveService", reflect.TypeOf((*MockRepo)(nil).RemoveService), arg0)
 }
