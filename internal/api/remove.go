@@ -21,7 +21,7 @@ func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *pb.RemoveService
 		return nil, invalidArgErr
 	}
 
-	serviceID, err := uuid.Parse(req.Uuid)
+	serviceID, err := uuid.Parse(req.ServiceId)
 
 	if err != nil {
 		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is not valid UUID")

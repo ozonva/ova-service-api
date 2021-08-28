@@ -42,7 +42,7 @@ func mapServiceToServiceShortInfoV1Response(service models.Service) *pb.ServiceS
 	ts := timestamppb.New(*service.WhenLocal)
 
 	return &pb.ServiceShortInfoV1Response{
-		Uuid:        service.ID.String(),
+		ServiceId:   service.ID.String(),
 		UserId:      service.UserID,
 		ServiceName: service.ServiceName,
 		When:        ts,

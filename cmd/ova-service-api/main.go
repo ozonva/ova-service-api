@@ -14,7 +14,7 @@ const grpcServerEndpoint = "localhost:8082"
 
 func main() {
 	if err := runGrpcServer(); err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 

@@ -37,7 +37,7 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *pb.CreateService
 		return nil, status.Errorf(codes.Internal, "Error occurred during saving to repo: %s", repoErr.Error())
 	}
 
-	return &pb.CreateServiceV1Response{Uuid: service.ID.String()}, nil
+	return &pb.CreateServiceV1Response{ServiceId: service.ID.String()}, nil
 }
 
 func extractTimeFromTimestamp(ts *timestamp.Timestamp) *time.Time {

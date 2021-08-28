@@ -22,7 +22,7 @@ func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *pb.DescribeSer
 		return nil, invalidArgErr
 	}
 
-	serviceID, err := uuid.Parse(req.Uuid)
+	serviceID, err := uuid.Parse(req.ServiceId)
 
 	if err != nil {
 		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is not valid UUID")
@@ -44,7 +44,7 @@ func mapServiceToDescribeV1Response(service *models.Service) *pb.DescribeService
 	tsUTC := timestamppb.New(*service.WhenUTC)
 
 	return &pb.DescribeServiceV1Response{
-		Uuid:           service.ID.String(),
+		ServiceId:      service.ID.String(),
 		UserId:         service.UserID,
 		Description:    service.Description,
 		ServiceName:    service.ServiceName,
