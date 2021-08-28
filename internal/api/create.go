@@ -17,8 +17,8 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *ova_service_api.
 	log.Info().Msg("CreateServiceV1 is called...")
 
 	if req == nil {
-		invalidArgErr := status.Errorf(codes.InvalidArgument, nilRequestArgumentMsg)
-		log.Err(invalidArgErr).Msg(createServiceV1Err)
+		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is nil")
+		log.Err(invalidArgErr).Msg("Error occurred in CreateServiceV1")
 		return nil, invalidArgErr
 	}
 
@@ -27,7 +27,7 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *ova_service_api.
 
 	if err != nil {
 		internalErr := status.Errorf(codes.Internal, "Error occurred during service creation: %s", err.Error())
-		log.Err(internalErr).Msg(createServiceV1Err)
+		log.Err(internalErr).Msg("Error occurred in CreateServiceV1")
 		return nil, internalErr
 	}
 

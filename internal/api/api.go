@@ -8,14 +8,6 @@ import (
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-const (
-	nilRequestArgumentMsg = "Request argument is nil"
-	createServiceV1Err    = "Error occurred in CreateServiceV1"
-	describeServiceV1Err  = "Error occurred in DescribeServiceV1"
-	listServicesV1Err     = "Error occurred in ListServicesV1"
-	removeServicesV1Err   = "Error occurred in RemoveServicesV1"
-)
-
 type Repo interface {
 	AddServices(services []models.Service) error
 	ListServices(limit, offset uint64) ([]models.Service, error)

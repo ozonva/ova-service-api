@@ -16,8 +16,8 @@ func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *ova_service_api.
 	log.Info().Msg("RemoveServiceV1 is called...")
 
 	if req == nil {
-		invalidArgErr := status.Errorf(codes.InvalidArgument, nilRequestArgumentMsg)
-		log.Err(invalidArgErr).Msg(removeServicesV1Err)
+		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is nil")
+		log.Err(invalidArgErr).Msg("Error occurred in RemoveServicesV1")
 		return nil, invalidArgErr
 	}
 
@@ -25,7 +25,7 @@ func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *ova_service_api.
 
 	if err != nil {
 		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is not valid UUID")
-		log.Err(invalidArgErr).Msg(removeServicesV1Err)
+		log.Err(invalidArgErr).Msg("Error occurred in RemoveServicesV1")
 		return nil, invalidArgErr
 	}
 

@@ -16,8 +16,8 @@ func (s *GrpcApiServer) ListServicesV1(_ context.Context, req *ova_service_api.L
 	log.Info().Msg("ListServiceV1 is called...")
 
 	if req == nil {
-		invalidArgErr := status.Errorf(codes.InvalidArgument, nilRequestArgumentMsg)
-		log.Err(invalidArgErr).Msg(listServicesV1Err)
+		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is nil")
+		log.Err(invalidArgErr).Msg("Error occurred in ListServicesV1")
 		return nil, invalidArgErr
 	}
 

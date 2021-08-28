@@ -17,8 +17,8 @@ func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *ova_service_ap
 	log.Info().Msg("DescribeServiceV1 is called...")
 
 	if req == nil {
-		invalidArgErr := status.Errorf(codes.InvalidArgument, nilRequestArgumentMsg)
-		log.Err(invalidArgErr).Msg(describeServiceV1Err)
+		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is nil")
+		log.Err(invalidArgErr).Msg("Error occurred in DescribeServiceV1")
 		return nil, invalidArgErr
 	}
 
@@ -26,7 +26,7 @@ func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *ova_service_ap
 
 	if err != nil {
 		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is not valid UUID")
-		log.Err(invalidArgErr).Msg(describeServiceV1Err)
+		log.Err(invalidArgErr).Msg("Error occurred in DescribeServiceV1")
 		return nil, invalidArgErr
 	}
 
