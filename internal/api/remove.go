@@ -9,10 +9,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/ozonva/ova-service-api/pkg/ova-service-api"
+	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *ova_service_api.RemoveServiceV1Request) (*empty.Empty, error) {
+func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *pb.RemoveServiceV1Request) (*empty.Empty, error) {
 	log.Info().Msg("RemoveServiceV1 is called...")
 
 	if req == nil {

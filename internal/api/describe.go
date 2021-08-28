@@ -10,10 +10,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/ozonva/ova-service-api/internal/models"
-	"github.com/ozonva/ova-service-api/pkg/ova-service-api"
+	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *ova_service_api.DescribeServiceV1Request) (*ova_service_api.DescribeServiceV1Response, error) {
+func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *pb.DescribeServiceV1Request) (*pb.DescribeServiceV1Response, error) {
 	log.Info().Msg("DescribeServiceV1 is called...")
 
 	if req == nil {
@@ -39,11 +39,11 @@ func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *ova_service_ap
 	return mapServiceToDescribeV1Response(service), nil
 }
 
-func mapServiceToDescribeV1Response(service *models.Service) *ova_service_api.DescribeServiceV1Response {
+func mapServiceToDescribeV1Response(service *models.Service) *pb.DescribeServiceV1Response {
 	ts := timestamppb.New(*service.WhenLocal)
 	tsUTC := timestamppb.New(*service.WhenUTC)
 
-	return &ova_service_api.DescribeServiceV1Response{
+	return &pb.DescribeServiceV1Response{
 		Uuid:           service.ID.String(),
 		UserId:         service.UserID,
 		Description:    service.Description,

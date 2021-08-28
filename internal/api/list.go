@@ -9,10 +9,10 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/ozonva/ova-service-api/internal/models"
-	"github.com/ozonva/ova-service-api/pkg/ova-service-api"
+	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) ListServicesV1(_ context.Context, req *ova_service_api.ListServicesV1Request) (*ova_service_api.ListServicesV1Response, error) {
+func (s *GrpcApiServer) ListServicesV1(_ context.Context, req *pb.ListServicesV1Request) (*pb.ListServicesV1Response, error) {
 	log.Info().Msg("ListServiceV1 is called...")
 
 	if req == nil {
@@ -27,21 +27,21 @@ func (s *GrpcApiServer) ListServicesV1(_ context.Context, req *ova_service_api.L
 		return nil, status.Errorf(codes.Internal, "Error occurred during list services: %s", repoErr.Error())
 	}
 
-	infos := make([]*ova_service_api.ServiceShortInfoV1Response, len(services))
+	infos := make([]*pb.ServiceShortInfoV1Response, len(services))
 
 	for i, service := range services {
 		infos[i] = mapServiceToServiceShortInfoV1Response(service)
 	}
 
-	return &ova_service_api.ListServicesV1Response{
+	return &pb.ListServicesV1Response{
 		ServiceShortInfo: infos,
 	}, nil
 }
 
-func mapServiceToServiceShortInfoV1Response(service models.Service) *ova_service_api.ServiceShortInfoV1Response {
+func mapServiceToServiceShortInfoV1Response(service models.Service) *pb.ServiceShortInfoV1Response {
 	ts := timestamppb.New(*service.WhenLocal)
 
-	return &ova_service_api.ServiceShortInfoV1Response{
+	return &pb.ServiceShortInfoV1Response{
 		Uuid:        service.ID.String(),
 		UserId:      service.UserID,
 		ServiceName: service.ServiceName,

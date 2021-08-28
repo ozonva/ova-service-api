@@ -10,10 +10,10 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/ozonva/ova-service-api/internal/models"
-	"github.com/ozonva/ova-service-api/pkg/ova-service-api"
+	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *ova_service_api.CreateServiceV1Request) (*ova_service_api.CreateServiceV1Response, error) {
+func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *pb.CreateServiceV1Request) (*pb.CreateServiceV1Response, error) {
 	log.Info().Msg("CreateServiceV1 is called...")
 
 	if req == nil {
@@ -37,7 +37,7 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *ova_service_api.
 		return nil, status.Errorf(codes.Internal, "Error occurred during saving to repo: %s", repoErr.Error())
 	}
 
-	return &ova_service_api.CreateServiceV1Response{Uuid: service.ID.String()}, nil
+	return &pb.CreateServiceV1Response{Uuid: service.ID.String()}, nil
 }
 
 func extractTimeFromTimestamp(ts *timestamp.Timestamp) *time.Time {
