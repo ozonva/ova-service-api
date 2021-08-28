@@ -19,9 +19,13 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServiceAPIClient interface {
+	// Create new service
 	CreateServiceV1(ctx context.Context, in *CreateServiceV1Request, opts ...grpc.CallOption) (*CreateServiceV1Response, error)
+	// Get service details
 	DescribeServiceV1(ctx context.Context, in *DescribeServiceV1Request, opts ...grpc.CallOption) (*DescribeServiceV1Response, error)
-	ListServicesV1(ctx context.Context, in *ListServicesV1Request, opts ...grpc.CallOption) (*ListServicesV1Response, error)
+	// List services with pagination
+	ListServicesV1(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListServicesV1Response, error)
+	// Remove service
 	RemoveServiceV1(ctx context.Context, in *RemoveServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -51,7 +55,7 @@ func (c *serviceAPIClient) DescribeServiceV1(ctx context.Context, in *DescribeSe
 	return out, nil
 }
 
-func (c *serviceAPIClient) ListServicesV1(ctx context.Context, in *ListServicesV1Request, opts ...grpc.CallOption) (*ListServicesV1Response, error) {
+func (c *serviceAPIClient) ListServicesV1(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListServicesV1Response, error) {
 	out := new(ListServicesV1Response)
 	err := c.cc.Invoke(ctx, "/ova.service.ServiceAPI/ListServicesV1", in, out, opts...)
 	if err != nil {
@@ -73,9 +77,13 @@ func (c *serviceAPIClient) RemoveServiceV1(ctx context.Context, in *RemoveServic
 // All implementations must embed UnimplementedServiceAPIServer
 // for forward compatibility
 type ServiceAPIServer interface {
+	// Create new service
 	CreateServiceV1(context.Context, *CreateServiceV1Request) (*CreateServiceV1Response, error)
+	// Get service details
 	DescribeServiceV1(context.Context, *DescribeServiceV1Request) (*DescribeServiceV1Response, error)
-	ListServicesV1(context.Context, *ListServicesV1Request) (*ListServicesV1Response, error)
+	// List services with pagination
+	ListServicesV1(context.Context, *empty.Empty) (*ListServicesV1Response, error)
+	// Remove service
 	RemoveServiceV1(context.Context, *RemoveServiceV1Request) (*empty.Empty, error)
 	mustEmbedUnimplementedServiceAPIServer()
 }
@@ -90,7 +98,7 @@ func (UnimplementedServiceAPIServer) CreateServiceV1(context.Context, *CreateSer
 func (UnimplementedServiceAPIServer) DescribeServiceV1(context.Context, *DescribeServiceV1Request) (*DescribeServiceV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DescribeServiceV1 not implemented")
 }
-func (UnimplementedServiceAPIServer) ListServicesV1(context.Context, *ListServicesV1Request) (*ListServicesV1Response, error) {
+func (UnimplementedServiceAPIServer) ListServicesV1(context.Context, *empty.Empty) (*ListServicesV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListServicesV1 not implemented")
 }
 func (UnimplementedServiceAPIServer) RemoveServiceV1(context.Context, *RemoveServiceV1Request) (*empty.Empty, error) {
@@ -146,7 +154,7 @@ func _ServiceAPI_DescribeServiceV1_Handler(srv interface{}, ctx context.Context,
 }
 
 func _ServiceAPI_ListServicesV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListServicesV1Request)
+	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -158,7 +166,7 @@ func _ServiceAPI_ListServicesV1_Handler(srv interface{}, ctx context.Context, de
 		FullMethod: "/ova.service.ServiceAPI/ListServicesV1",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ServiceAPIServer).ListServicesV1(ctx, req.(*ListServicesV1Request))
+		return srv.(ServiceAPIServer).ListServicesV1(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

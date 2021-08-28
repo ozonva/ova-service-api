@@ -4,16 +4,40 @@ package ova.service;
 
 option go_package = "github.com/ozonva/ova-service-api";
 
+import "google/api/annotations.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 
-
+// gRPC API to process user services
 service ServiceAPI {
-  rpc CreateServiceV1(CreateServiceV1Request) returns (CreateServiceV1Response);
-  rpc DescribeServiceV1(DescribeServiceV1Request) returns (DescribeServiceV1Response);
-  rpc ListServicesV1(ListServicesV1Request) returns (ListServicesV1Response);
-  rpc RemoveServiceV1(RemoveServiceV1Request) returns (google.protobuf.Empty);
+  // Create new service
+  rpc CreateServiceV1(CreateServiceV1Request) returns (CreateServiceV1Response) {
+    option (google.api.http) = {
+      post: "/v1/create"
+    };
+  }
+
+  // Get service details
+  rpc DescribeServiceV1(DescribeServiceV1Request) returns (DescribeServiceV1Response) {
+    option (google.api.http) = {
+      get: "/v1/describe/{service_id}"
+    };
+  }
+
+  // List services with pagination
+  rpc ListServicesV1(google.protobuf.Empty) returns (ListServicesV1Response) {
+    option (google.api.http) = {
+      get: "/v1/list"
+    };
+  }
+
+  // Remove service
+  rpc RemoveServiceV1(RemoveServiceV1Request) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/v1/remove/{service_id}"
+    };
+  }
 }
 
 message CreateServiceV1Request {
@@ -40,11 +64,6 @@ message DescribeServiceV1Response {
   string service_address = 5;
   google.protobuf.Timestamp when = 6;
   google.protobuf.Timestamp when_utc = 7;
-}
-
-message ListServicesV1Request {
-  uint64 limit = 1;
-  uint64 offset = 2;
 }
 
 message ListServicesV1Response {

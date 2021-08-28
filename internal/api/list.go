@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
@@ -12,16 +13,11 @@ import (
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) ListServicesV1(_ context.Context, req *pb.ListServicesV1Request) (*pb.ListServicesV1Response, error) {
+func (s *GrpcApiServer) ListServicesV1(_ context.Context, _ *empty.Empty) (*pb.ListServicesV1Response, error) {
 	log.Info().Msg("ListServiceV1 is called...")
 
-	if req == nil {
-		invalidArgErr := status.Errorf(codes.InvalidArgument, "Request argument is nil")
-		log.Err(invalidArgErr).Msg("Error occurred in ListServicesV1")
-		return nil, invalidArgErr
-	}
-
-	services, repoErr := s.repo.ListServices(req.Limit, req.Offset)
+	// We want to list all and satisfy the Repo interface
+	services, repoErr := s.repo.ListServices(^uint64(0), 0)
 
 	if repoErr != nil {
 		return nil, status.Errorf(codes.Internal, "Error occurred during list services: %s", repoErr.Error())
