@@ -2,8 +2,9 @@ package api
 
 import (
 	"context"
-	"github.com/golang/protobuf/ptypes/empty"
+	"fmt"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -26,7 +27,13 @@ func (s *GrpcApiServer) ListServicesV1(_ context.Context, _ *empty.Empty) (*pb.L
 	infos := make([]*pb.ServiceShortInfoV1Response, len(services))
 
 	for i, service := range services {
-		infos[i] = mapServiceToServiceShortInfoV1Response(service)
+		info, mapErr := mapServiceToServiceShortInfoV1Response(&service)
+
+		if mapErr != nil {
+			return nil, status.Errorf(codes.Internal, "can't convert domain entity \"service\" at index %d to response entity: %s", i, mapErr.Error())
+		}
+
+		infos[i] = info
 	}
 
 	return &pb.ListServicesV1Response{
@@ -34,13 +41,20 @@ func (s *GrpcApiServer) ListServicesV1(_ context.Context, _ *empty.Empty) (*pb.L
 	}, nil
 }
 
-func mapServiceToServiceShortInfoV1Response(service models.Service) *pb.ServiceShortInfoV1Response {
-	ts := timestamppb.New(*service.WhenLocal)
+func mapServiceToServiceShortInfoV1Response(service *models.Service) (*pb.ServiceShortInfoV1Response, error) {
+	if service == nil {
+		return nil, fmt.Errorf("service is nil")
+	}
+
+	var ts *timestamppb.Timestamp
+	if service.WhenLocal != nil {
+		ts = timestamppb.New(*service.WhenLocal)
+	}
 
 	return &pb.ServiceShortInfoV1Response{
 		ServiceId:   service.ID.String(),
 		UserId:      service.UserID,
 		ServiceName: service.ServiceName,
 		When:        ts,
-	}
+	}, nil
 }

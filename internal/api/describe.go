@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -36,12 +37,29 @@ func (s *GrpcApiServer) DescribeServiceV1(_ context.Context, req *pb.DescribeSer
 		return nil, status.Error(codes.NotFound, "Service was not found")
 	}
 
-	return mapServiceToDescribeV1Response(service), nil
+	res, mapErr := mapServiceToDescribeV1Response(service)
+
+	if mapErr != nil {
+		return nil, status.Errorf(codes.Internal, "can't convert domain entity \"service\" to response entity: %s", mapErr.Error())
+	}
+
+	return res, nil
 }
 
-func mapServiceToDescribeV1Response(service *models.Service) *pb.DescribeServiceV1Response {
-	ts := timestamppb.New(*service.WhenLocal)
-	tsUTC := timestamppb.New(*service.WhenUTC)
+func mapServiceToDescribeV1Response(service *models.Service) (*pb.DescribeServiceV1Response, error) {
+	if service == nil {
+		return nil, fmt.Errorf("service is nil")
+	}
+
+	var ts *timestamppb.Timestamp
+	if service.WhenLocal != nil {
+		ts = timestamppb.New(*service.WhenLocal)
+	}
+
+	var tsUTC *timestamppb.Timestamp
+	if service.WhenUTC != nil {
+		tsUTC = timestamppb.New(*service.WhenUTC)
+	}
 
 	return &pb.DescribeServiceV1Response{
 		ServiceId:      service.ID.String(),
@@ -51,5 +69,5 @@ func mapServiceToDescribeV1Response(service *models.Service) *pb.DescribeService
 		ServiceAddress: service.ServiceAddress,
 		When:           ts,
 		WhenUtc:        tsUTC,
-	}
+	}, nil
 }
