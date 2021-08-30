@@ -2,15 +2,15 @@
 -- +goose StatementBegin
 CREATE TABLE Services
 (
-  ID UUID PRIMARY KEY,
-  UserID BIGINT NOT NULL,
-  Description VARCHAR(4000) NULL,
-  ServiceName VARCHAR(1000) NULL,
-  ServiceAddress VARCHAR(1000) NULL,
-  WhenLocal TIMESTAMP NULL,
-  WhenUTC TIMESTAMP NULL,
-  CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id UUID PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  description VARCHAR(4000) NULL,
+  service_name VARCHAR(1000) NULL,
+  service_address VARCHAR(1000) NULL,
+  when_local TIMESTAMP NULL,
+  when_utc TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 -- +goose StatementEnd
 
