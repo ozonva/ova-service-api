@@ -37,4 +37,11 @@ bin/
 dist/
 out/
 
+# Protobuf vendoring
 vendor.protogen
+
+# Database volume
+.data
+
+### Environment files ###
+.env
