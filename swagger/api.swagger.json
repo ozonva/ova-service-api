@@ -1,0 +1,225 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "api/ova-service-api/service.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/create": {
+      "post": {
+        "summary": "Create new service",
+        "operationId": "ServiceAPI_CreateServiceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serviceCreateServiceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "tags": [
+          "ServiceAPI"
+        ]
+      }
+    },
+    "/v1/describe/{service_id}": {
+      "get": {
+        "summary": "Get service details",
+        "operationId": "ServiceAPI_DescribeServiceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serviceDescribeServiceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ServiceAPI"
+        ]
+      }
+    },
+    "/v1/list": {
+      "get": {
+        "summary": "List services with pagination",
+        "operationId": "ServiceAPI_ListServicesV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serviceListServicesV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "tags": [
+          "ServiceAPI"
+        ]
+      }
+    },
+    "/v1/remove/{service_id}": {
+      "delete": {
+        "summary": "Remove service",
+        "operationId": "ServiceAPI_RemoveServiceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ServiceAPI"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "serviceCreateServiceV1Response": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string"
+        }
+      }
+    },
+    "serviceDescribeServiceV1Response": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "description": {
+          "type": "string"
+        },
+        "service_name": {
+          "type": "string"
+        },
+        "service_address": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "when_utc": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "serviceListServicesV1Response": {
+      "type": "object",
+      "properties": {
+        "service_short_info": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/serviceServiceShortInfoV1Response"
+          }
+        }
+      }
+    },
+    "serviceServiceShortInfoV1Response": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "service_name": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

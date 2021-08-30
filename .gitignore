@@ -36,3 +36,5 @@
 bin/
 dist/
 out/
+
+vendor.protogen
