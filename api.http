@@ -1,0 +1,30 @@
+###########################################
+# Simple REST/HTTP file to test endpoints #
+###########################################
+
+GET http://localhost:8081/v1/list
+Accept: application/json
+
+###
+
+POST http://localhost:8081/v1/create
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "description": "Service created with api.http",
+  "service_name": "Panzer service",
+  "service_address": "Nowhere",
+  "when": "2021-08-31T23:55:00Z"
+}
+
+###
+
+GET http://localhost:8081/v1/remove/08d73d5f-29b6-4493-8ad4-8ce7d037ed79
+Content-Type: application/json
+
+###
+
+DELETE http://localhost:8081/v1/remove/d6fa505c-6072-4a45-bdae-86e6b13d7342
+
+###

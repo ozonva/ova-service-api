@@ -140,13 +140,13 @@ func (repo *PostgresServiceRepo) DescribeService(serviceID uuid.UUID) (*models.S
 
 	row := repo.db.QueryRowContext(repo.ctx, query, serviceID)
 
-	var service *models.Service
+	var service models.Service
 	err := row.Scan(&service.ID, &service.UserID, &service.Description, &service.ServiceName,
 		&service.ServiceAddress, &service.WhenLocal, &service.WhenUTC)
 
 	switch err {
 	case nil:
-		return service, nil
+		return &service, nil
 	case sql.ErrNoRows:
 		notFoundErr := fmt.Errorf("service with ID: %s was not found in the repo", serviceID.String())
 		log.Err(notFoundErr).Msg("Error occurred during describe service")
