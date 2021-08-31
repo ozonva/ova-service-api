@@ -79,12 +79,27 @@ func (repo *PostgresServiceRepo) AddServices(services []models.Service) error {
 func (repo *PostgresServiceRepo) ListServices(limit uint64, offset uint64) ([]models.Service, error) {
 	log.Debug().Msg("PostgresServiceRepo.ListServices call")
 
-	query := `SELECT id, user_id, description, service_name, service_address, when_local, when_utc
+	var (
+		query string
+		rows  *sql.Rows
+		err   error
+	)
+
+	// This is actually a hack to handle the difference between the required Repo API which includes limit and offset
+	// and gRPC server API which allows to list all.
+	if limit < ^uint64(0) {
+		query = `SELECT id, user_id, description, service_name, service_address, when_local, when_utc
 			FROM services
 			ORDER BY when_utc DESC
 			LIMIT $1 OFFSET $2`
+		rows, err = repo.db.QueryContext(repo.ctx, query, limit, offset)
+	} else {
+		query = `SELECT id, user_id, description, service_name, service_address, when_local, when_utc
+			FROM services
+			ORDER BY when_utc DESC`
+		rows, err = repo.db.QueryContext(repo.ctx, query)
+	}
 
-	rows, err := repo.db.QueryContext(repo.ctx, query, limit, offset)
 	if err != nil {
 		log.Err(err).Msg("Error occurred during query execution")
 		return nil, err
