@@ -4,10 +4,13 @@ import (
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/ozonva/ova-service-api/internal/api"
+	"github.com/ozonva/ova-service-api/internal/repo"
 	"log"
 	"net"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
@@ -19,21 +22,38 @@ const (
 )
 
 func main() {
-	go runHttpServer()
+	// Ignore error because .env file may not exist, in this case real environment variables will be used
+	_ = godotenv.Load()
 
-	if err := runGrpcServer(); err != nil {
+	dsn, ok := os.LookupEnv("DATABASE_CONNECTION_STRING")
+
+	if !ok {
+		log.Fatal("DATABASE_CONNECTION_STRING environment variable is required")
+	}
+
+	ctx := context.Background()
+	pgRepo, err := repo.NewPostgresServiceRepo(ctx, dsn)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go runHttpServer(ctx)
+
+	if err = runGrpcServer(ctx, pgRepo); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func runGrpcServer() error {
+// Actually it should use root context, but for this task we do not use it
+func runGrpcServer(ctx context.Context, repo repo.Repo) error {
 	listen, err := net.Listen("tcp", grpcServerEndpoint)
 	if err != nil {
 		log.Fatalf("gRPC: failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterServiceAPIServer(s, api.NewGrpcApiServer())
+	pb.RegisterServiceAPIServer(s, api.NewGrpcApiServer(repo))
 
 	if grpcErr := s.Serve(listen); grpcErr != nil {
 		log.Fatalf("gRPC: failed to serve: %v", grpcErr)
@@ -42,8 +62,7 @@ func runGrpcServer() error {
 	return nil
 }
 
-func runHttpServer() {
-	ctx := context.Background()
+func runHttpServer(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
