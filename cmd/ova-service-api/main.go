@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/ozonva/ova-service-api/internal/api"
-	"github.com/ozonva/ova-service-api/internal/repo"
 	"log"
 	"net"
 	"net/http"
 	"os"
 
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
+
+	"github.com/ozonva/ova-service-api/internal/api"
+	"github.com/ozonva/ova-service-api/internal/repo"
 
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
@@ -46,7 +47,7 @@ func main() {
 }
 
 // Actually it should use root context, but for this task we do not use it
-func runGrpcServer(ctx context.Context, repo repo.Repo) error {
+func runGrpcServer(_ context.Context, repo repo.Repo) error {
 	listen, err := net.Listen("tcp", grpcServerEndpoint)
 	if err != nil {
 		log.Fatalf("gRPC: failed to listen: %v", err)
