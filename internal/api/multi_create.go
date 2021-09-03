@@ -37,7 +37,7 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 		return nil, internalErr
 	}
 
-	serivceIDs := make([]string, 0)
+	serviceIDs := make([]string, 0)
 
 	for i, chunk := range chunks {
 		repoErr := s.repo.AddServices(chunk)
@@ -48,10 +48,10 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 			return nil, internalErr
 		}
 
-		serivceIDs = append(serivceIDs, mapServiceToServiceIDStrings(chunk)...)
+		serviceIDs = append(serviceIDs, mapServiceToServiceIDStrings(chunk)...)
 	}
 
-	return &pb.MultiCreateServiceV1Response{ServiceId: serivceIDs}, nil
+	return &pb.MultiCreateServiceV1Response{ServiceId: serviceIDs}, nil
 }
 
 func mapServiceRequestToDomainServices(reqServices []*pb.CreateServiceV1Request) ([]models.Service, error) {
@@ -85,8 +85,8 @@ func mapServiceToServiceIDStrings(services []models.Service) []string {
 
 	serviceIDs := make([]string, len(services))
 
-	for _, service := range services {
-		serviceIDs = append(serviceIDs, service.ID.String())
+	for i, service := range services {
+		serviceIDs[i] = service.ID.String()
 	}
 
 	return serviceIDs
