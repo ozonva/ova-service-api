@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE Services
+CREATE TABLE services
 (
   id UUID PRIMARY KEY,
   user_id BIGINT NOT NULL,
@@ -16,5 +16,5 @@ CREATE TABLE Services
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE Services;
+DROP TABLE services;
 -- +goose StatementEnd

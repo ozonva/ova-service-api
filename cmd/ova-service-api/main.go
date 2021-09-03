@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	httpServerEndpoint = "localhost:8081"
-	grpcServerEndpoint = "localhost:8082"
+	httpServerEndpoint   = "localhost:8081"
+	grpcServerEndpoint   = "localhost:8082"
+	multiCreateBatchSize = 5
 )
 
 func main() {
@@ -54,7 +55,7 @@ func runGrpcServer(_ context.Context, repo repo.Repo) error {
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterServiceAPIServer(s, api.NewGrpcApiServer(repo))
+	pb.RegisterServiceAPIServer(s, api.NewGrpcApiServer(repo, multiCreateBatchSize))
 
 	if grpcErr := s.Serve(listen); grpcErr != nil {
 		log.Fatalf("gRPC: failed to serve: %v", grpcErr)

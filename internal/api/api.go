@@ -12,15 +12,18 @@ type Repo interface {
 	ListServices(limit, offset uint64) ([]models.Service, error)
 	DescribeService(serviceID uuid.UUID) (*models.Service, error)
 	RemoveService(serviceID uuid.UUID) error
+	UpdateService(service *models.Service) error
 }
 
 type GrpcApiServer struct {
 	pb.UnimplementedServiceAPIServer
-	repo Repo
+	repo                 Repo
+	multiCreateBatchSize uint
 }
 
-func NewGrpcApiServer(repo Repo) *GrpcApiServer {
+func NewGrpcApiServer(repo Repo, multiCreateBatchSize uint) *GrpcApiServer {
 	return &GrpcApiServer{
-		repo: repo,
+		repo:                 repo,
+		multiCreateBatchSize: multiCreateBatchSize,
 	}
 }
