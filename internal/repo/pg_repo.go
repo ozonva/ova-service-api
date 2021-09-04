@@ -13,6 +13,16 @@ import (
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
+type dbService struct {
+	ID             uuid.UUID
+	UserID         uint64
+	Description    sql.NullString
+	ServiceName    sql.NullString
+	ServiceAddress sql.NullString
+	WhenLocal      sql.NullTime
+	WhenUTC        sql.NullTime
+}
+
 type PostgresServiceRepo struct {
 	ctx context.Context
 	db  *sql.DB
@@ -105,13 +115,15 @@ func (repo *PostgresServiceRepo) ListServices(limit uint64, offset uint64) ([]mo
 	services := make([]models.Service, 0)
 
 	for rows.Next() {
-		var service models.Service
+		var service dbService
+
 		if err = rows.Scan(&service.ID, &service.UserID, &service.Description, &service.ServiceName,
 			&service.ServiceAddress, &service.WhenLocal, &service.WhenUTC); err != nil {
 			log.Err(err).Msg("Can't parse single row")
 			return nil, err
 		}
-		services = append(services, service)
+
+		services = append(services, mapDBServiceToDomainService(&service))
 	}
 
 	if err = rows.Err(); err != nil {
@@ -131,13 +143,14 @@ func (repo *PostgresServiceRepo) DescribeService(serviceID uuid.UUID) (*models.S
 
 	row := repo.db.QueryRowContext(repo.ctx, query, serviceID)
 
-	var service models.Service
+	var service dbService
 	err := row.Scan(&service.ID, &service.UserID, &service.Description, &service.ServiceName,
 		&service.ServiceAddress, &service.WhenLocal, &service.WhenUTC)
 
 	switch err {
 	case nil:
-		return &service, nil
+		domainService := mapDBServiceToDomainService(&service)
+		return &domainService, nil
 	case sql.ErrNoRows:
 		notFoundErr := fmt.Errorf("service with ID: %s was not found in the repo", serviceID.String())
 		log.Err(notFoundErr).Msg("Error occurred during describe service")
@@ -161,4 +174,25 @@ func (repo *PostgresServiceRepo) RemoveService(serviceID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func mapDBServiceToDomainService(service *dbService) models.Service {
+	var domainService models.Service
+
+	domainService.ID = service.ID
+	domainService.UserID = service.UserID
+
+	// We can skip Valid check because default string value is OK for us
+	domainService.Description = service.Description.String
+	domainService.ServiceName = service.Description.String
+	domainService.ServiceAddress = service.Description.String
+
+	if service.WhenLocal.Valid {
+		domainService.WhenLocal = &service.WhenLocal.Time
+	}
+	if service.WhenUTC.Valid {
+		domainService.WhenUTC = &service.WhenUTC.Time
+	}
+
+	return domainService
 }
