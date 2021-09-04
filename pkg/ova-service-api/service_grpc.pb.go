@@ -28,7 +28,7 @@ type ServiceAPIClient interface {
 	// Remove service
 	RemoveServiceV1(ctx context.Context, in *RemoveServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Create multiple services
-	MultiCreateServiceV1(ctx context.Context, in *MultiCreateServiceV1Request, opts ...grpc.CallOption) (*MultiCreateServiceV1Response, error)
+	MultiCreateServiceV1(ctx context.Context, in *MultiCreateServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error)
 	// Update service
 	UpdateServiceV1(ctx context.Context, in *UpdateServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error)
 }
@@ -77,8 +77,8 @@ func (c *serviceAPIClient) RemoveServiceV1(ctx context.Context, in *RemoveServic
 	return out, nil
 }
 
-func (c *serviceAPIClient) MultiCreateServiceV1(ctx context.Context, in *MultiCreateServiceV1Request, opts ...grpc.CallOption) (*MultiCreateServiceV1Response, error) {
-	out := new(MultiCreateServiceV1Response)
+func (c *serviceAPIClient) MultiCreateServiceV1(ctx context.Context, in *MultiCreateServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, "/ova.service.ServiceAPI/MultiCreateServiceV1", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ type ServiceAPIServer interface {
 	// Remove service
 	RemoveServiceV1(context.Context, *RemoveServiceV1Request) (*empty.Empty, error)
 	// Create multiple services
-	MultiCreateServiceV1(context.Context, *MultiCreateServiceV1Request) (*MultiCreateServiceV1Response, error)
+	MultiCreateServiceV1(context.Context, *MultiCreateServiceV1Request) (*empty.Empty, error)
 	// Update service
 	UpdateServiceV1(context.Context, *UpdateServiceV1Request) (*empty.Empty, error)
 	mustEmbedUnimplementedServiceAPIServer()
@@ -130,7 +130,7 @@ func (UnimplementedServiceAPIServer) ListServicesV1(context.Context, *empty.Empt
 func (UnimplementedServiceAPIServer) RemoveServiceV1(context.Context, *RemoveServiceV1Request) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveServiceV1 not implemented")
 }
-func (UnimplementedServiceAPIServer) MultiCreateServiceV1(context.Context, *MultiCreateServiceV1Request) (*MultiCreateServiceV1Response, error) {
+func (UnimplementedServiceAPIServer) MultiCreateServiceV1(context.Context, *MultiCreateServiceV1Request) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method MultiCreateServiceV1 not implemented")
 }
 func (UnimplementedServiceAPIServer) UpdateServiceV1(context.Context, *UpdateServiceV1Request) (*empty.Empty, error) {

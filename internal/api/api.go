@@ -2,10 +2,17 @@ package api
 
 import (
 	"github.com/google/uuid"
-
 	"github.com/ozonva/ova-service-api/internal/models"
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
+
+type DelayedSaver interface {
+	Save(service models.Service) error
+}
+
+type MultiCreateFlusher interface {
+	Flush(services []models.Service) []models.Service
+}
 
 type Repo interface {
 	AddServices(services []models.Service) error
@@ -17,13 +24,15 @@ type Repo interface {
 
 type GrpcApiServer struct {
 	pb.UnimplementedServiceAPIServer
-	repo                 Repo
-	multiCreateBatchSize uint
+	repo    Repo
+	saver   DelayedSaver
+	flusher MultiCreateFlusher
 }
 
-func NewGrpcApiServer(repo Repo, multiCreateBatchSize uint) *GrpcApiServer {
+func NewGrpcApiServer(repo Repo, saver DelayedSaver, flusher MultiCreateFlusher) *GrpcApiServer {
 	return &GrpcApiServer{
-		repo:                 repo,
-		multiCreateBatchSize: multiCreateBatchSize,
+		repo:    repo,
+		saver:   saver,
+		flusher: flusher,
 	}
 }

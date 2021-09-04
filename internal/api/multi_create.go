@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/ozonva/ova-service-api/internal/utils"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,7 +12,7 @@ import (
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCreateServiceV1Request) (*pb.MultiCreateServiceV1Response, error) {
+func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCreateServiceV1Request) (*empty.Empty, error) {
 	log.Info().Msg("MultiCreateServiceV1 is called...")
 
 	if req == nil {
@@ -29,29 +29,15 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 		return nil, internalErr
 	}
 
-	chunks, err := utils.SplitToBulks(services, s.multiCreateBatchSize)
+	notSavedServices := s.flusher.Flush(services)
 
-	if err != nil {
-		internalErr := status.Errorf(codes.Internal, "Can't split services to chunks: %s", err.Error())
+	if len(notSavedServices) > 0 {
+		internalErr := status.Errorf(codes.Internal, "Can't save all services properly. %d services was discarded", len(notSavedServices))
 		log.Err(internalErr).Msg("Error occurred in MultiCreateServiceV1")
 		return nil, internalErr
 	}
 
-	serviceIDs := make([]string, 0)
-
-	for i, chunk := range chunks {
-		repoErr := s.repo.AddServices(chunk)
-
-		if repoErr != nil {
-			internalErr := status.Errorf(codes.Internal, "Repo error occured on chunk %d: %s", i, repoErr.Error())
-			log.Err(internalErr).Msg("Error occurred in MultiCreateServiceV1")
-			return nil, internalErr
-		}
-
-		serviceIDs = append(serviceIDs, mapServiceToServiceIDStrings(chunk)...)
-	}
-
-	return &pb.MultiCreateServiceV1Response{ServiceId: serviceIDs}, nil
+	return &empty.Empty{}, nil
 }
 
 func mapServiceRequestToDomainServices(reqServices []*pb.CreateServiceV1Request) ([]models.Service, error) {
@@ -76,18 +62,4 @@ func mapServiceRequestToDomainServices(reqServices []*pb.CreateServiceV1Request)
 	}
 
 	return services, nil
-}
-
-func mapServiceToServiceIDStrings(services []models.Service) []string {
-	if len(services) == 0 {
-		return make([]string, 0)
-	}
-
-	serviceIDs := make([]string, len(services))
-
-	for i, service := range services {
-		serviceIDs[i] = service.ID.String()
-	}
-
-	return serviceIDs
 }

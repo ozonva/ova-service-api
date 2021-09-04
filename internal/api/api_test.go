@@ -18,12 +18,12 @@ import (
 )
 
 var _ = Describe("Api", func() {
-	const multiCreateBatchInterval = 1
-
 	var (
-		ctx      context.Context
-		ctrl     *gomock.Controller
-		repoMock *mocks.MockRepo
+		ctx         context.Context
+		ctrl        *gomock.Controller
+		repoMock    *mocks.MockRepo
+		flusherMock *mocks.MockFlusher
+		saverMock   *mocks.MockSaver
 
 		carServiceID string
 		carService   models.Service
@@ -35,6 +35,8 @@ var _ = Describe("Api", func() {
 		ctx = context.Background()
 		ctrl = gomock.NewController(GinkgoT())
 		repoMock = mocks.NewMockRepo(ctrl)
+		flusherMock = mocks.NewMockFlusher(ctrl)
+		saverMock = mocks.NewMockSaver(ctrl)
 
 		carServiceID = "d6fa505c-6072-4a45-bdae-86e6b13d7342"
 		carService = models.Service{
@@ -57,7 +59,7 @@ var _ = Describe("Api", func() {
 		Context("on calling Create endpoint", func() {
 			When("request body is empty", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().AddServices(gomock.Any()).Times(0)
 
 					_, err := server.CreateServiceV1(ctx, nil)
@@ -68,7 +70,7 @@ var _ = Describe("Api", func() {
 
 			When("request body contains illegal service data", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().AddServices(gomock.Any()).Times(0)
 
 					_, err := server.CreateServiceV1(ctx, &pb.CreateServiceV1Request{UserId: 0})
@@ -79,7 +81,7 @@ var _ = Describe("Api", func() {
 
 			When("repo return error", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().AddServices(gomock.Any()).
 						Return(fmt.Errorf("repo err")).Times(1)
 
@@ -91,7 +93,7 @@ var _ = Describe("Api", func() {
 
 			When("valid request", func() {
 				It("should return serviceID", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().AddServices(gomock.Any()).Times(1)
 
 					res, err := server.CreateServiceV1(ctx, &pb.CreateServiceV1Request{UserId: 1})
@@ -105,7 +107,7 @@ var _ = Describe("Api", func() {
 		Context("on calling Describe endpoint", func() {
 			When("request body is empty", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().DescribeService(gomock.Any()).Times(0)
 
 					_, err := server.DescribeServiceV1(ctx, nil)
@@ -116,7 +118,7 @@ var _ = Describe("Api", func() {
 
 			When("can't parse serviceID", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().DescribeService(gomock.Any()).Times(0)
 
 					_, err := server.DescribeServiceV1(ctx, &pb.DescribeServiceV1Request{ServiceId: "bad uuid"})
@@ -127,7 +129,7 @@ var _ = Describe("Api", func() {
 
 			When("service not found", func() {
 				It("should return NotFound error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().DescribeService(gomock.Any()).
 						Return(nil, fmt.Errorf("not found")).Times(1)
 
@@ -139,7 +141,7 @@ var _ = Describe("Api", func() {
 
 			When("can't map service model to response", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().DescribeService(gomock.Any()).Return(nil, nil).Times(1)
 
 					_, err := server.DescribeServiceV1(ctx, &pb.DescribeServiceV1Request{ServiceId: carServiceID})
@@ -150,7 +152,7 @@ var _ = Describe("Api", func() {
 
 			When("valid request", func() {
 				It("should return service", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().DescribeService(gomock.Any()).Return(&carService, nil).Times(1)
 
 					res, err := server.DescribeServiceV1(ctx, &pb.DescribeServiceV1Request{ServiceId: carServiceID})
@@ -164,7 +166,7 @@ var _ = Describe("Api", func() {
 		Context("on calling List endpoint", func() {
 			When("error occurs in repo", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().ListServices(gomock.Any(), gomock.Any()).
 						Return(nil, fmt.Errorf("repo error")).Times(1)
 
@@ -176,7 +178,7 @@ var _ = Describe("Api", func() {
 
 			When("valid request", func() {
 				It("should return list of services", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().ListServices(gomock.Any(), gomock.Any()).
 						Return([]models.Service{carService, carService}, nil).Times(1)
 
@@ -193,7 +195,7 @@ var _ = Describe("Api", func() {
 		Context("on calling Remove endpoint", func() {
 			When("request body is empty", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().RemoveService(gomock.Any()).Times(0)
 
 					_, err := server.RemoveServiceV1(ctx, nil)
@@ -204,7 +206,7 @@ var _ = Describe("Api", func() {
 
 			When("can't parse serviceID", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().RemoveService(gomock.Any()).Times(0)
 
 					_, err := server.RemoveServiceV1(ctx, &pb.RemoveServiceV1Request{ServiceId: "bad uuid"})
@@ -215,7 +217,7 @@ var _ = Describe("Api", func() {
 
 			When("service not found", func() {
 				It("should return NotFound error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().RemoveService(gomock.Any()).
 						Return(fmt.Errorf("not found")).Times(1)
 
@@ -227,7 +229,7 @@ var _ = Describe("Api", func() {
 
 			When("valid request", func() {
 				It("should return empty result after removing", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().RemoveService(gomock.Any()).
 						Return(nil).Times(1)
 
@@ -242,8 +244,8 @@ var _ = Describe("Api", func() {
 		Context("on calling MultiCreate endpoint", func() {
 			When("request body is empty", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
-					repoMock.EXPECT().AddServices(gomock.Any()).Times(0)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
+					flusherMock.EXPECT().Flush(gomock.Any()).Times(0)
 
 					_, err := server.MultiCreateServiceV1(ctx, nil)
 
@@ -253,8 +255,8 @@ var _ = Describe("Api", func() {
 
 			When("request body contains list with invalid objects", func() {
 				It("should return Argument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
-					repoMock.EXPECT().AddServices(gomock.Any()).Times(0)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
+					flusherMock.EXPECT().Flush(gomock.Any()).Times(0)
 					req := &pb.MultiCreateServiceV1Request{CreateService: []*pb.CreateServiceV1Request{nil}}
 
 					_, err := server.MultiCreateServiceV1(ctx, req)
@@ -263,23 +265,11 @@ var _ = Describe("Api", func() {
 				})
 			})
 
-			When("can't split request services by chunks", func() {
+			When("can't flush all services to repo", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, 0)
-					repoMock.EXPECT().AddServices(gomock.Any()).Times(0)
-					req := &pb.MultiCreateServiceV1Request{CreateService: validMultiCreateRequest}
-
-					_, err := server.MultiCreateServiceV1(ctx, req)
-
-					Expect(err).Should(HaveOccurred())
-				})
-			})
-
-			When("repo return error", func() {
-				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
-					repoMock.EXPECT().AddServices(gomock.Any()).
-						Return(fmt.Errorf("repo err")).Times(1)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
+					flusherMock.EXPECT().Flush(gomock.Any()).
+						Return([]models.Service{carService}).Times(1)
 					req := &pb.MultiCreateServiceV1Request{CreateService: validMultiCreateRequest}
 
 					_, err := server.MultiCreateServiceV1(ctx, req)
@@ -290,14 +280,14 @@ var _ = Describe("Api", func() {
 
 			When("valid request", func() {
 				It("should return slice of serviceID", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
-					repoMock.EXPECT().AddServices(gomock.Any()).Times(2)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
+					flusherMock.EXPECT().Flush(gomock.Any()).Return(nil).Times(1)
 					req := &pb.MultiCreateServiceV1Request{CreateService: validMultiCreateRequest}
 
 					res, err := server.MultiCreateServiceV1(ctx, req)
 
 					Expect(err).ShouldNot(HaveOccurred())
-					Expect(len(res.ServiceId)).Should(Equal(2))
+					Expect(res).Should(BeEquivalentTo(&empty.Empty{}))
 				})
 			})
 		})
@@ -305,7 +295,7 @@ var _ = Describe("Api", func() {
 		Context("on calling Update endpoint", func() {
 			When("request body is empty", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().UpdateService(gomock.Any()).Times(0)
 
 					_, err := server.UpdateServiceV1(ctx, nil)
@@ -316,7 +306,7 @@ var _ = Describe("Api", func() {
 
 			When("can't parse serviceID", func() {
 				It("should return InvalidArgument error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().UpdateService(gomock.Any()).Times(0)
 
 					_, err := server.UpdateServiceV1(ctx, &pb.UpdateServiceV1Request{ServiceId: "bad uuid"})
@@ -327,7 +317,7 @@ var _ = Describe("Api", func() {
 
 			When("request body contains illegal service data", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().UpdateService(gomock.Any()).Times(0)
 
 					_, err := server.UpdateServiceV1(ctx, &pb.UpdateServiceV1Request{ServiceId: carServiceID, UserId: 0})
@@ -338,7 +328,7 @@ var _ = Describe("Api", func() {
 
 			When("repo return error", func() {
 				It("should return Internal error", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().UpdateService(gomock.Any()).
 						Return(fmt.Errorf("repo err")).Times(1)
 
@@ -350,7 +340,7 @@ var _ = Describe("Api", func() {
 
 			When("valid request", func() {
 				It("should update service", func() {
-					server := api.NewGrpcApiServer(repoMock, multiCreateBatchInterval)
+					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
 					repoMock.EXPECT().UpdateService(gomock.Any()).Times(1)
 
 					res, err := server.UpdateServiceV1(ctx, &pb.UpdateServiceV1Request{ServiceId: carServiceID, UserId: 1})

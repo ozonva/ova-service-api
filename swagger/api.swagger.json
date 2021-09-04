@@ -106,7 +106,7 @@
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/serviceMultiCreateServiceV1Response"
+              "properties": {}
             }
           },
           "default": {
@@ -313,17 +313,6 @@
           "type": "array",
           "items": {
             "$ref": "#/definitions/serviceCreateServiceV1Request"
-          }
-        }
-      }
-    },
-    "serviceMultiCreateServiceV1Response": {
-      "type": "object",
-      "properties": {
-        "service_id": {
-          "type": "array",
-          "items": {
-            "type": "string"
           }
         }
       }
