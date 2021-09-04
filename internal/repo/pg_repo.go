@@ -252,8 +252,8 @@ func mapDBServiceToDomainService(service *dbService) models.Service {
 
 	// We can skip Valid check because default string value is OK for us
 	domainService.Description = service.Description.String
-	domainService.ServiceName = service.Description.String
-	domainService.ServiceAddress = service.Description.String
+	domainService.ServiceName = service.ServiceName.String
+	domainService.ServiceAddress = service.ServiceAddress.String
 
 	if service.WhenLocal.Valid {
 		domainService.WhenLocal = &service.WhenLocal.Time
