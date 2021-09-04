@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/ozonva/ova-service-api/internal/models"
@@ -12,6 +13,16 @@ import (
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
+
+type dbService struct {
+	ID             uuid.UUID
+	UserID         uint64
+	Description    sql.NullString
+	ServiceName    sql.NullString
+	ServiceAddress sql.NullString
+	WhenLocal      sql.NullTime
+	WhenUTC        sql.NullTime
+}
 
 type PostgresServiceRepo struct {
 	ctx context.Context
@@ -44,31 +55,22 @@ func (repo *PostgresServiceRepo) AddServices(services []models.Service) error {
 		return nil
 	}
 
-	tx, err := repo.db.BeginTx(repo.ctx, nil)
-	defer func(tx *sql.Tx) {
-		txErr := tx.Rollback()
-		if txErr != sql.ErrTxDone {
-			log.Err(txErr).Msg("Can' rollback the transaction")
-		}
-	}(tx)
+	queryParts := make([]string, len(services)+1)
+	queryParts[0] = "INSERT INTO services (id, user_id, description, service_name, service_address, when_local, when_utc) VALUES "
 
-	if err != nil {
+	queryValues := make([]interface{}, 0)
+
+	for i, service := range services {
+		// This looks crazy, but this is because of placeholders in pgx: $1, $2, $3, etc. I can't find a way how to do it easier using database/sql.
+		queryParts[i+1] = fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d),", 7*i+1, 7*i+2, 7*i+3, 7*i+4, 7*i+5, 7*i+6, 7*i+7)
+		queryValues = append(queryValues, service.ID, service.UserID, service.Description, service.ServiceName, service.ServiceAddress, service.WhenLocal, service.WhenUTC)
+	}
+
+	query := strings.Join(queryParts, "")
+	query = query[:len(query)-1] // Remove trailing comma
+
+	if _, err := repo.db.ExecContext(repo.ctx, query, queryValues...); err != nil {
 		log.Err(err).Msg("Failed to begin transaction")
-		return err
-	}
-
-	query := `INSERT INTO services (id, user_id, description, service_name, service_address, when_local, when_utc)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)`
-
-	for _, service := range services {
-		if _, err = tx.ExecContext(repo.ctx, query, service.ID, service.UserID, service.Description, service.ServiceName, service.ServiceAddress, service.WhenLocal, service.WhenUTC); err != nil {
-			log.Err(err).Msg("Failed to begin transaction")
-			return err
-		}
-	}
-
-	if err = tx.Commit(); err != nil {
-		log.Err(err).Msg("Error occurred during commit transaction")
 		return err
 	}
 
@@ -114,13 +116,15 @@ func (repo *PostgresServiceRepo) ListServices(limit uint64, offset uint64) ([]mo
 	services := make([]models.Service, 0)
 
 	for rows.Next() {
-		var service models.Service
+		var service dbService
+
 		if err = rows.Scan(&service.ID, &service.UserID, &service.Description, &service.ServiceName,
 			&service.ServiceAddress, &service.WhenLocal, &service.WhenUTC); err != nil {
 			log.Err(err).Msg("Can't parse single row")
 			return nil, err
 		}
-		services = append(services, service)
+
+		services = append(services, mapDBServiceToDomainService(&service))
 	}
 
 	if err = rows.Err(); err != nil {
@@ -140,13 +144,14 @@ func (repo *PostgresServiceRepo) DescribeService(serviceID uuid.UUID) (*models.S
 
 	row := repo.db.QueryRowContext(repo.ctx, query, serviceID)
 
-	var service models.Service
+	var service dbService
 	err := row.Scan(&service.ID, &service.UserID, &service.Description, &service.ServiceName,
 		&service.ServiceAddress, &service.WhenLocal, &service.WhenUTC)
 
 	switch err {
 	case nil:
-		return &service, nil
+		domainService := mapDBServiceToDomainService(&service)
+		return &domainService, nil
 	case sql.ErrNoRows:
 		notFoundErr := fmt.Errorf("service with ID: %s was not found in the repo", serviceID.String())
 		log.Err(notFoundErr).Msg("Error occurred during describe service")
@@ -237,4 +242,25 @@ func (repo *PostgresServiceRepo) UpdateService(service *models.Service) error {
 
 	log.Info().Msg("Service was successfully updated")
 	return nil
+}
+
+func mapDBServiceToDomainService(service *dbService) models.Service {
+	var domainService models.Service
+
+	domainService.ID = service.ID
+	domainService.UserID = service.UserID
+
+	// We can skip Valid check because default string value is OK for us
+	domainService.Description = service.Description.String
+	domainService.ServiceName = service.Description.String
+	domainService.ServiceAddress = service.Description.String
+
+	if service.WhenLocal.Valid {
+		domainService.WhenLocal = &service.WhenLocal.Time
+	}
+	if service.WhenUTC.Valid {
+		domainService.WhenUTC = &service.WhenUTC.Time
+	}
+
+	return domainService
 }
