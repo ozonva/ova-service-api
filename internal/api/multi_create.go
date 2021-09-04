@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,7 +11,7 @@ import (
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCreateServiceV1Request) (*empty.Empty, error) {
+func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCreateServiceV1Request) (*pb.MultiCreateServiceV1Response, error) {
 	log.Info().Msg("MultiCreateServiceV1 is called...")
 
 	if req == nil {
@@ -37,7 +36,7 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 		return nil, internalErr
 	}
 
-	return &empty.Empty{}, nil
+	return &pb.MultiCreateServiceV1Response{ServiceId: mapServiceToServiceIDStrings(services)}, nil
 }
 
 func mapServiceRequestToDomainServices(reqServices []*pb.CreateServiceV1Request) ([]models.Service, error) {
@@ -55,11 +54,25 @@ func mapServiceRequestToDomainServices(reqServices []*pb.CreateServiceV1Request)
 		service, err := models.NewService(rs.UserId, rs.Description, rs.ServiceName, rs.ServiceAddress, when)
 
 		if err != nil {
-			return nil, fmt.Errorf("can't create service")
+			return nil, err
 		}
 
 		services[i] = *service
 	}
 
 	return services, nil
+}
+
+func mapServiceToServiceIDStrings(services []models.Service) []string {
+	if len(services) == 0 {
+		return make([]string, 0)
+	}
+
+	serviceIDs := make([]string, len(services))
+
+	for i, service := range services {
+		serviceIDs[i] = service.ID.String()
+	}
+
+	return serviceIDs
 }

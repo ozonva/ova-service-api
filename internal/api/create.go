@@ -31,10 +31,10 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *pb.CreateService
 		return nil, internalErr
 	}
 
-	repoErr := s.repo.AddServices([]models.Service{*service})
+	saverErr := s.saver.Save(*service)
 
-	if repoErr != nil {
-		return nil, status.Errorf(codes.Internal, "Error occurred during saving to repo: %s", repoErr.Error())
+	if saverErr != nil {
+		return nil, status.Errorf(codes.Internal, "Error occurred while saver trying to save the service: %s", saverErr.Error())
 	}
 
 	return &pb.CreateServiceV1Response{ServiceId: service.ID.String()}, nil

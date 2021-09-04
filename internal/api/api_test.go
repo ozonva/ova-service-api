@@ -79,11 +79,11 @@ var _ = Describe("Api", func() {
 				})
 			})
 
-			When("repo return error", func() {
+			When("saver return error", func() {
 				It("should return Internal error", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
-					repoMock.EXPECT().AddServices(gomock.Any()).
-						Return(fmt.Errorf("repo err")).Times(1)
+					saverMock.EXPECT().Save(gomock.Any()).
+						Return(fmt.Errorf("saver err")).Times(1)
 
 					_, err := server.CreateServiceV1(ctx, &pb.CreateServiceV1Request{UserId: 1})
 
@@ -94,7 +94,7 @@ var _ = Describe("Api", func() {
 			When("valid request", func() {
 				It("should return serviceID", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock)
-					repoMock.EXPECT().AddServices(gomock.Any()).Times(1)
+					saverMock.EXPECT().Save(gomock.Any()).Return(nil).Times(1)
 
 					res, err := server.CreateServiceV1(ctx, &pb.CreateServiceV1Request{UserId: 1})
 
@@ -287,7 +287,7 @@ var _ = Describe("Api", func() {
 					res, err := server.MultiCreateServiceV1(ctx, req)
 
 					Expect(err).ShouldNot(HaveOccurred())
-					Expect(res).Should(BeEquivalentTo(&empty.Empty{}))
+					Expect(len(res.ServiceId)).Should(Equal(2))
 				})
 			})
 		})

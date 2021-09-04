@@ -4,19 +4,12 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/joho/godotenv"
 
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
 	repo_ "github.com/ozonva/ova-service-api/internal/repo"
 	saver_ "github.com/ozonva/ova-service-api/internal/saver"
-)
-
-const (
-	multiCreateBatchSize = 5
-	flushTimeout         = 1 * time.Second
-	localCapacity        = 10
 )
 
 type Dependencies struct {

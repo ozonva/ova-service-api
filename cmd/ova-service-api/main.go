@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
@@ -18,8 +19,11 @@ import (
 )
 
 const (
-	httpServerEndpoint = "localhost:8081"
-	grpcServerEndpoint = "localhost:8082"
+	httpServerEndpoint   = "localhost:8081"
+	grpcServerEndpoint   = "localhost:8082"
+	multiCreateBatchSize = 5
+	flushTimeout         = 1 * time.Second
+	localCapacity        = 10
 )
 
 func main() {

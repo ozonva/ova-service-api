@@ -41,7 +41,7 @@ service ServiceAPI {
   }
 
   // Create multiple services
-  rpc MultiCreateServiceV1(MultiCreateServiceV1Request) returns (google.protobuf.Empty) {
+  rpc MultiCreateServiceV1(MultiCreateServiceV1Request) returns (MultiCreateServiceV1Response) {
     option (google.api.http) = {
       post: "/v1/multicreate"
       body: "*"
