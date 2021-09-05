@@ -6,7 +6,7 @@ import (
 )
 
 type Producer interface {
-	SendMessage(message string) (int32, int64, error)
+	SendMessage(message string) error
 	SendMessages(messages []string) error
 }
 
@@ -35,14 +35,14 @@ func NewSyncProducer(topic string, brokers []string) (*SyncProducer, error) {
 	return &ksp, err
 }
 
-func (ksp SyncProducer) SendMessage(message string) (int32, int64, error) {
+func (ksp SyncProducer) SendMessage(message string) error {
 	if len(message) == 0 {
-		return -1, -1, fmt.Errorf("empty message is not allowed")
+		return fmt.Errorf("empty message is not allowed")
 	}
 
 	msg := prepareMessage(ksp.topic, message)
-	partition, offset, err := ksp.producer.SendMessage(msg)
-	return partition, offset, err
+	_, _, err := ksp.producer.SendMessage(msg)
+	return err
 }
 
 func (ksp SyncProducer) SendMessages(messages []string) error {

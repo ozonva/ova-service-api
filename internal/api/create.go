@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/ozonva/ova-service-api/internal/events"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
@@ -32,9 +33,14 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *pb.CreateService
 	}
 
 	saverErr := s.saver.Save(*service)
-
 	if saverErr != nil {
 		return nil, status.Errorf(codes.Internal, "Error occurred while saver trying to save the service: %s", saverErr.Error())
+	}
+
+	event := events.NewServiceCreateEvent(service.ID)
+	kafkaErr := s.producer.SendMessage(event.String())
+	if kafkaErr != nil {
+		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce Create event to Kafka: %s", kafkaErr.Error())
 	}
 
 	return &pb.CreateServiceV1Response{ServiceId: service.ID.String()}, nil

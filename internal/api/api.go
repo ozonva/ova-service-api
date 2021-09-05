@@ -15,7 +15,7 @@ type MultiCreateFlusher interface {
 }
 
 type KafkaProducer interface {
-	SendMessage(message string) (int32, int64, error)
+	SendMessage(message string) error
 	SendMessages(messages []string) error
 }
 

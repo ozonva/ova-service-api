@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/ozonva/ova-service-api/internal/events"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
@@ -30,9 +31,16 @@ func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *pb.RemoveService
 	}
 
 	repoErr := s.repo.RemoveService(serviceID)
-
 	if repoErr != nil {
 		return nil, status.Error(codes.NotFound, "Service was not found")
+	}
+
+	// It is possible situation when delete actually doesn't occur because entity was already deleted,
+	// but we do not handle this situation for now and consider that our consumers are idempotent.
+	event := events.NewServiceDeleteEvent(serviceID)
+	kafkaErr := s.producer.SendMessage(event.String())
+	if kafkaErr != nil {
+		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce Delete event to Kafka: %s", kafkaErr.Error())
 	}
 
 	return &empty.Empty{}, nil

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"github.com/ozonva/ova-service-api/internal/events"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/google/uuid"
@@ -41,9 +42,14 @@ func (s *GrpcApiServer) UpdateServiceV1(_ context.Context, req *pb.UpdateService
 
 	updatedService.ID = serviceID
 	repoErr := s.repo.UpdateService(updatedService)
-
 	if repoErr != nil {
 		return nil, status.Errorf(codes.Internal, "Error occurred during saving to repo: %s", repoErr.Error())
+	}
+
+	event := events.NewServiceUpdateEvent(serviceID)
+	kafkaErr := s.producer.SendMessage(event.String())
+	if kafkaErr != nil {
+		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce Update event to Kafka: %s", kafkaErr.Error())
 	}
 
 	return &empty.Empty{}, nil

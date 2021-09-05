@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/ozonva/ova-service-api/internal/events"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -29,11 +30,16 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 	}
 
 	notSavedServices := s.flusher.Flush(services)
-
 	if len(notSavedServices) > 0 {
 		internalErr := status.Errorf(codes.Internal, "Can't save all services properly. %d services was discarded", len(notSavedServices))
 		log.Err(internalErr).Msg("Error occurred in MultiCreateServiceV1")
 		return nil, internalErr
+	}
+
+	messages := mapServicesToMessages(services)
+	kafkaErr := s.producer.SendMessages(messages)
+	if kafkaErr != nil {
+		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce events to Kafka for MultiCreate operation: %s", kafkaErr.Error())
 	}
 
 	return &pb.MultiCreateServiceV1Response{ServiceId: mapServiceToServiceIDStrings(services)}, nil
@@ -75,4 +81,19 @@ func mapServiceToServiceIDStrings(services []models.Service) []string {
 	}
 
 	return serviceIDs
+}
+
+func mapServicesToMessages(services []models.Service) []string {
+	if len(services) == 0 {
+		return make([]string, 0)
+	}
+
+	messages := make([]string, len(services))
+
+	for i, service := range services {
+		event := events.NewServiceCreateEvent(service.ID)
+		messages[i] = event.String()
+	}
+
+	return messages
 }
