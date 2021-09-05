@@ -43,5 +43,7 @@ func (s *GrpcApiServer) RemoveServiceV1(_ context.Context, req *pb.RemoveService
 		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce Delete event to Kafka: %s", kafkaErr.Error())
 	}
 
+	s.metrics.IncrementRemoveCounter()
+
 	return &empty.Empty{}, nil
 }

@@ -43,6 +43,8 @@ func (s *GrpcApiServer) CreateServiceV1(_ context.Context, req *pb.CreateService
 		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce Create event to Kafka: %s", kafkaErr.Error())
 	}
 
+	s.metrics.IncrementCreateCounter()
+
 	return &pb.CreateServiceV1Response{ServiceId: service.ID.String()}, nil
 }
 

@@ -6,6 +6,13 @@ import (
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
+type Metrics interface {
+	IncrementCreateCounter()
+	IncrementMultiCreateCounter()
+	IncrementUpdateCounter()
+	IncrementRemoveCounter()
+}
+
 type DelayedSaver interface {
 	Save(service models.Service) error
 }
@@ -33,13 +40,15 @@ type GrpcApiServer struct {
 	saver    DelayedSaver
 	flusher  MultiCreateFlusher
 	producer KafkaProducer
+	metrics  Metrics
 }
 
-func NewGrpcApiServer(repo Repo, saver DelayedSaver, flusher MultiCreateFlusher, producer KafkaProducer) *GrpcApiServer {
+func NewGrpcApiServer(repo Repo, saver DelayedSaver, flusher MultiCreateFlusher, producer KafkaProducer, metrics Metrics) *GrpcApiServer {
 	return &GrpcApiServer{
 		repo:     repo,
 		saver:    saver,
 		flusher:  flusher,
 		producer: producer,
+		metrics:  metrics,
 	}
 }

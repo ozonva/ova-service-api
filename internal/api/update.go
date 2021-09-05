@@ -52,5 +52,7 @@ func (s *GrpcApiServer) UpdateServiceV1(_ context.Context, req *pb.UpdateService
 		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce Update event to Kafka: %s", kafkaErr.Error())
 	}
 
+	s.metrics.IncrementUpdateCounter()
+
 	return &empty.Empty{}, nil
 }

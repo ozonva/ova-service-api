@@ -42,6 +42,8 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 		return nil, status.Errorf(codes.Internal, "Error occurred while trying to produce events to Kafka for MultiCreate operation: %s", kafkaErr.Error())
 	}
 
+	s.metrics.IncrementMultiCreateCounter()
+
 	return &pb.MultiCreateServiceV1Response{ServiceId: mapServiceToServiceIDStrings(services)}, nil
 }
 

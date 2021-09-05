@@ -5,6 +5,7 @@ import (
 
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
 	"github.com/ozonva/ova-service-api/internal/kafka"
+	metrics_ "github.com/ozonva/ova-service-api/internal/metrics"
 	repo_ "github.com/ozonva/ova-service-api/internal/repo"
 	saver_ "github.com/ozonva/ova-service-api/internal/saver"
 )
@@ -14,6 +15,7 @@ type dependencies struct {
 	Flusher  flusher_.Flusher
 	Saver    saver_.Saver
 	Producer kafka.Producer
+	Metrics  metrics_.Metrics
 }
 
 type dependencyResolver struct {
@@ -44,11 +46,14 @@ func (dr *dependencyResolver) resolve() (*dependencies, error) {
 		return nil, err
 	}
 
+	metrics := metrics_.NewPrometheusMetrics()
+
 	deps := dependencies{
 		Repo:     pgRepo,
 		Flusher:  flusher,
 		Saver:    saver,
 		Producer: producer,
+		Metrics:  metrics,
 	}
 
 	return &deps, nil
