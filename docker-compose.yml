@@ -15,6 +15,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper
+    restart: always
     environment:
       zk_id: "1"
       ZOOKEEPER_CLIENT_PORT: 32181
@@ -25,6 +26,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka
+    restart: always
     depends_on:
       - zookeeper
     environment:
@@ -39,6 +41,7 @@ services:
 
   kafdrop:
     image: obsidiandynamics/kafdrop
+    restart: always
     depends_on:
       - kafka
     environment:
@@ -48,7 +51,15 @@ services:
 
   prometheus:
     image: prom/prometheus
+    restart: always
     volumes:
       - "./prometheus.yml:/etc/prometheus/prometheus.yml"
     ports:
       - "9090:9090"
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    restart: always
+    ports:
+      - "6831:6831/udp"
+      - "16686:16686"
