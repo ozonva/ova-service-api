@@ -184,28 +184,7 @@ func (repo *PostgresServiceRepo) UpdateService(service *models.Service) error {
 		return nilErr
 	}
 
-	query := `SELECT version
-			FROM services
-			WHERE id = $1`
-
-	row := repo.db.QueryRowContext(repo.ctx, query, service.ID)
-	var version int
-
-	err := row.Scan(&version)
-
-	switch err {
-	case nil:
-		break
-	case sql.ErrNoRows:
-		notFoundErr := fmt.Errorf("service with ID: %s was not found in the repo", service.ID.String())
-		log.Err(notFoundErr).Msg("Error occurred during update service")
-		return notFoundErr
-	default:
-		log.Err(err).Msg("Error occurred during query execution")
-		return err
-	}
-
-	query = `UPDATE services
+	query := `UPDATE services
 			SET user_id = $1,
 			    description = $2,
 			    service_name = $3,
@@ -214,11 +193,10 @@ func (repo *PostgresServiceRepo) UpdateService(service *models.Service) error {
 			    when_utc = $6,
 			    updated_at = CURRENT_TIMESTAMP,
 			    version = version + 1
-			WHERE id = $7
-			  AND version = $8`
+			WHERE id = $7`
 
 	res, err := repo.db.ExecContext(repo.ctx, query, service.UserID, service.Description, service.ServiceName,
-		service.ServiceAddress, service.WhenLocal, service.WhenUTC, service.ID, version)
+		service.ServiceAddress, service.WhenLocal, service.WhenUTC, service.ID)
 
 	if err != nil {
 		log.Err(err).Msg("Error occurs during update operation execution")
