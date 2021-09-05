@@ -2,45 +2,35 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
-
-	"github.com/joho/godotenv"
 
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
+	"github.com/ozonva/ova-service-api/internal/kafka"
 	repo_ "github.com/ozonva/ova-service-api/internal/repo"
 	saver_ "github.com/ozonva/ova-service-api/internal/saver"
 )
 
-type Dependencies struct {
-	ctx     context.Context
-	repo    repo_.Repo
-	flusher flusher_.Flusher
-	saver   saver_.Saver
+type dependencies struct {
+	Repo     repo_.Repo
+	Flusher  flusher_.Flusher
+	Saver    saver_.Saver
+	Producer kafka.Producer
 }
 
-func NewDependencies() (*Dependencies, error) {
-	return resolve()
+type dependencyResolver struct {
+	ctx  context.Context
+	env  environment
+	deps *dependencies
 }
 
-func (deps *Dependencies) Close() {
-	if deps.saver != nil {
-		deps.saver.Close()
+func newDependencyResolver(ctx context.Context, env environment) dependencyResolver {
+	return dependencyResolver{
+		ctx: ctx,
+		env: env,
 	}
 }
 
-func resolve() (*Dependencies, error) {
-	ctx := context.Background()
-
-	// Ignore error because .env file may not exist, in this case real environment variables will be used
-	_ = godotenv.Load()
-
-	dsn, ok := os.LookupEnv("DATABASE_CONNECTION_STRING")
-	if !ok {
-		return nil, fmt.Errorf("DATABASE_CONNECTION_STRING environment variable is required")
-	}
-
-	pgRepo, err := repo_.NewPostgresServiceRepo(ctx, dsn)
+func (dr *dependencyResolver) resolve() (*dependencies, error) {
+	pgRepo, err := repo_.NewPostgresServiceRepo(dr.ctx, dr.env.DSN)
 	if err != nil {
 		return nil, err
 	}
@@ -49,12 +39,23 @@ func resolve() (*Dependencies, error) {
 	saver := saver_.New(localCapacity, flushTimeout, flusher)
 	saver.Init()
 
-	deps := Dependencies{
-		ctx:     ctx,
-		repo:    pgRepo,
-		flusher: flusher,
-		saver:   saver,
+	producer, err := kafka.NewSyncProducer(kafkaTopic, dr.env.Brokers)
+	if err != nil {
+		return nil, err
+	}
+
+	deps := dependencies{
+		Repo:     pgRepo,
+		Flusher:  flusher,
+		Saver:    saver,
+		Producer: producer,
 	}
 
 	return &deps, nil
+}
+
+func (dr *dependencyResolver) close() {
+	if dr.deps != nil && dr.deps.Saver != nil {
+		dr.deps.Saver.Close()
+	}
 }

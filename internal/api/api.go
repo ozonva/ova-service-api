@@ -14,6 +14,11 @@ type MultiCreateFlusher interface {
 	Flush(services []models.Service) []models.Service
 }
 
+type KafkaProducer interface {
+	SendMessage(message string) (int32, int64, error)
+	SendMessages(messages []string) error
+}
+
 type Repo interface {
 	AddServices(services []models.Service) error
 	ListServices(limit, offset uint64) ([]models.Service, error)
@@ -24,15 +29,17 @@ type Repo interface {
 
 type GrpcApiServer struct {
 	pb.UnimplementedServiceAPIServer
-	repo    Repo
-	saver   DelayedSaver
-	flusher MultiCreateFlusher
+	repo     Repo
+	saver    DelayedSaver
+	flusher  MultiCreateFlusher
+	producer KafkaProducer
 }
 
-func NewGrpcApiServer(repo Repo, saver DelayedSaver, flusher MultiCreateFlusher) *GrpcApiServer {
+func NewGrpcApiServer(repo Repo, saver DelayedSaver, flusher MultiCreateFlusher, producer KafkaProducer) *GrpcApiServer {
 	return &GrpcApiServer{
-		repo:    repo,
-		saver:   saver,
-		flusher: flusher,
+		repo:     repo,
+		saver:    saver,
+		flusher:  flusher,
+		producer: producer,
 	}
 }

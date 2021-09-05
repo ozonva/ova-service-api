@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/ozonva/ova-service-api/internal/kafka"
 	"log"
 	"net"
 	"net/http"
@@ -24,33 +25,39 @@ const (
 	multiCreateBatchSize = 5
 	flushTimeout         = 1 * time.Second
 	localCapacity        = 10
+	kafkaTopic           = "services"
 )
 
 func main() {
-	deps, err := NewDependencies()
+	ctx := context.Background()
+	env, err := readEnvironment()
+	if err != nil {
+		log.Fatalf("Error occured during read environment: %s", err.Error())
+	}
 
+	resolver := newDependencyResolver(ctx, env)
+	deps, err := resolver.resolve()
 	if err != nil {
 		log.Fatalf("Error occured during dependency resolve: %s", err.Error())
 	}
+	defer resolver.close()
 
-	defer deps.Close()
+	go runHttpServer(ctx)
 
-	go runHttpServer(deps.ctx)
-
-	if err = runGrpcServer(deps.ctx, deps.repo, deps.saver, deps.flusher); err != nil {
+	if err = runGrpcServer(ctx, deps.Repo, deps.Saver, deps.Flusher, deps.Producer); err != nil {
 		log.Fatal(err)
 	}
 }
 
 // Actually it should use root context, but for this task we do not use it
-func runGrpcServer(_ context.Context, repo repo_.Repo, saver saver_.Saver, flusher flusher_.Flusher) error {
+func runGrpcServer(_ context.Context, repo repo_.Repo, saver saver_.Saver, flusher flusher_.Flusher, producer kafka.Producer) error {
 	listen, err := net.Listen("tcp", grpcServerEndpoint)
 	if err != nil {
 		log.Fatalf("gRPC: failed to listen: %v", err)
 	}
 
 	s := grpc.NewServer()
-	pb.RegisterServiceAPIServer(s, api.NewGrpcApiServer(repo, saver, flusher))
+	pb.RegisterServiceAPIServer(s, api.NewGrpcApiServer(repo, saver, flusher, producer))
 
 	if grpcErr := s.Serve(listen); grpcErr != nil {
 		log.Fatalf("gRPC: failed to serve: %v", grpcErr)
