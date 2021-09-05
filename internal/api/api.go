@@ -4,7 +4,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/ozonva/ova-service-api/internal/models"
-	"github.com/ozonva/ova-service-api/internal/repo"
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
@@ -20,8 +19,8 @@ type GrpcApiServer struct {
 	repo Repo
 }
 
-func NewGrpcApiServer() *GrpcApiServer {
+func NewGrpcApiServer(repo Repo) *GrpcApiServer {
 	return &GrpcApiServer{
-		repo: repo.NewFakeServiceRepo(),
+		repo: repo,
 	}
 }

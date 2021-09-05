@@ -15,6 +15,7 @@ service ServiceAPI {
   rpc CreateServiceV1(CreateServiceV1Request) returns (CreateServiceV1Response) {
     option (google.api.http) = {
       post: "/v1/create"
+      body: "*"
     };
   }
 

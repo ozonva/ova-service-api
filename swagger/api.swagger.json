@@ -29,6 +29,16 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serviceCreateServiceV1Request"
+            }
+          }
+        ],
         "tags": [
           "ServiceAPI"
         ]
@@ -151,6 +161,28 @@
           "items": {
             "$ref": "#/definitions/protobufAny"
           }
+        }
+      }
+    },
+    "serviceCreateServiceV1Request": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "description": {
+          "type": "string"
+        },
+        "service_name": {
+          "type": "string"
+        },
+        "service_address": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
