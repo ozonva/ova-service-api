@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/opentracing/opentracing-go"
 	"github.com/ozonva/ova-service-api/internal/events"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
@@ -12,7 +13,7 @@ import (
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
 )
 
-func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCreateServiceV1Request) (*pb.MultiCreateServiceV1Response, error) {
+func (s *GrpcApiServer) MultiCreateServiceV1(ctx context.Context, req *pb.MultiCreateServiceV1Request) (*pb.MultiCreateServiceV1Response, error) {
 	log.Info().Msg("MultiCreateServiceV1 is called...")
 
 	if req == nil {
@@ -29,7 +30,16 @@ func (s *GrpcApiServer) MultiCreateServiceV1(_ context.Context, req *pb.MultiCre
 		return nil, internalErr
 	}
 
-	notSavedServices := s.flusher.Flush(services)
+	tracer := opentracing.GlobalTracer()
+	multiCreateParentSpan := tracer.StartSpan("MultiCreateServiceV1", opentracing.Tag{
+		Key:   "Count",
+		Value: len(services),
+	})
+	defer multiCreateParentSpan.Finish()
+
+	ctx = opentracing.ContextWithSpan(ctx, multiCreateParentSpan)
+	notSavedServices := s.flusher.Flush(ctx, services)
+
 	if len(notSavedServices) > 0 {
 		internalErr := status.Errorf(codes.Internal, "Can't save all services properly. %d services was discarded", len(notSavedServices))
 		log.Err(internalErr).Msg("Error occurred in MultiCreateServiceV1")

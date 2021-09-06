@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
 
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
 	"github.com/ozonva/ova-service-api/internal/infrastructure/kafka"
 	metrics_ "github.com/ozonva/ova-service-api/internal/infrastructure/metrics"
+	tracer_ "github.com/ozonva/ova-service-api/internal/infrastructure/tracer"
 	repo_ "github.com/ozonva/ova-service-api/internal/repo"
 	saver_ "github.com/ozonva/ova-service-api/internal/saver"
 )
@@ -16,6 +18,7 @@ type dependencies struct {
 	Saver    saver_.Saver
 	Producer kafka.Producer
 	Metrics  metrics_.Metrics
+	Tracer   *tracer_.JaegerTracer
 }
 
 type dependencyResolver struct {
@@ -46,6 +49,11 @@ func (dr *dependencyResolver) resolve() (*dependencies, error) {
 		return nil, err
 	}
 
+	tracer, err := tracer_.NewJaegerTracer()
+	if err != nil {
+		return nil, err
+	}
+
 	metrics := metrics_.NewPrometheusMetrics()
 
 	deps := dependencies{
@@ -54,13 +62,21 @@ func (dr *dependencyResolver) resolve() (*dependencies, error) {
 		Saver:    saver,
 		Producer: producer,
 		Metrics:  metrics,
+		Tracer:   tracer,
 	}
 
 	return &deps, nil
 }
 
 func (dr *dependencyResolver) close() {
-	if dr.deps != nil && dr.deps.Saver != nil {
+	if dr.deps.Saver != nil {
 		dr.deps.Saver.Close()
+	}
+
+	if dr.deps.Tracer != nil {
+		err := dr.deps.Tracer.Closer.Close()
+		if err != nil {
+			log.Fatalf("error occured during closing Jaeger tracer: %s", err.Error())
+		}
 	}
 }

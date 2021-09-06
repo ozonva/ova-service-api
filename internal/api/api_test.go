@@ -282,7 +282,7 @@ var _ = Describe("Api", func() {
 			When("request body is empty", func() {
 				It("should return InvalidArgument error", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock, producerMock, metricsMock)
-					flusherMock.EXPECT().Flush(gomock.Any()).Times(0)
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Any()).Times(0)
 
 					_, err := server.MultiCreateServiceV1(ctx, nil)
 
@@ -293,7 +293,7 @@ var _ = Describe("Api", func() {
 			When("request body contains list with invalid objects", func() {
 				It("should return Argument error", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock, producerMock, metricsMock)
-					flusherMock.EXPECT().Flush(gomock.Any()).Times(0)
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Any()).Times(0)
 					req := &pb.MultiCreateServiceV1Request{CreateService: []*pb.CreateServiceV1Request{nil}}
 
 					_, err := server.MultiCreateServiceV1(ctx, req)
@@ -305,7 +305,7 @@ var _ = Describe("Api", func() {
 			When("can't flush all services to repo", func() {
 				It("should return Internal error", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock, producerMock, metricsMock)
-					flusherMock.EXPECT().Flush(gomock.Any()).
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Any()).
 						Return([]models.Service{carService}).Times(1)
 					req := &pb.MultiCreateServiceV1Request{CreateService: validMultiCreateRequest}
 
@@ -318,7 +318,7 @@ var _ = Describe("Api", func() {
 			When("producer returns error", func() {
 				It("should return Internal error", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock, producerMock, metricsMock)
-					flusherMock.EXPECT().Flush(gomock.Any()).Times(1)
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Any()).Times(1)
 					producerMock.EXPECT().SendMessages(gomock.Any()).
 						Return(fmt.Errorf("producer error")).Times(1)
 					req := &pb.MultiCreateServiceV1Request{CreateService: validMultiCreateRequest}
@@ -332,7 +332,7 @@ var _ = Describe("Api", func() {
 			When("valid request", func() {
 				It("should return slice of serviceID", func() {
 					server := api.NewGrpcApiServer(repoMock, saverMock, flusherMock, producerMock, metricsMock)
-					flusherMock.EXPECT().Flush(gomock.Any()).
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Any()).
 						Return(nil).Times(1)
 					producerMock.EXPECT().SendMessages(gomock.Any()).
 						Return(nil).Times(1)

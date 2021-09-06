@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/ozonva/ova-service-api/internal/models"
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"
@@ -18,7 +19,7 @@ type DelayedSaver interface {
 }
 
 type MultiCreateFlusher interface {
-	Flush(services []models.Service) []models.Service
+	Flush(ctx context.Context, services []models.Service) []models.Service
 }
 
 type KafkaProducer interface {

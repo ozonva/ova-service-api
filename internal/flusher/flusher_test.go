@@ -1,6 +1,7 @@
 package flusher_test
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/golang/mock/gomock"
@@ -46,7 +47,7 @@ var _ = Describe("Flusher", func() {
 						repoMock.EXPECT().AddServices(gomock.Eq(services[0:2])).Return(nil),
 						repoMock.EXPECT().AddServices(gomock.Eq(services[2:])).Return(nil),
 					)
-					Expect(flusher.Flush(services)).To(BeNil())
+					Expect(flusher.Flush(context.Background(), services)).To(BeNil())
 				})
 			})
 
@@ -58,7 +59,7 @@ var _ = Describe("Flusher", func() {
 						repoMock.EXPECT().AddServices(gomock.Eq(services[0:2])).Return(nil),
 						repoMock.EXPECT().AddServices(gomock.Eq(services[2:])).Return(fmt.Errorf("connection failed")),
 					)
-					Expect(flusher.Flush(services)).To(BeEquivalentTo(services[2:]))
+					Expect(flusher.Flush(context.Background(), services)).To(BeEquivalentTo(services[2:]))
 				})
 			})
 
@@ -70,7 +71,7 @@ var _ = Describe("Flusher", func() {
 						repoMock.EXPECT().AddServices(gomock.Eq(services[0:2])).Return(fmt.Errorf("connection failed")),
 						repoMock.EXPECT().AddServices(gomock.Eq(services[2:])).Return(nil),
 					)
-					Expect(flusher.Flush(services)).To(BeEquivalentTo(services[0:2]))
+					Expect(flusher.Flush(context.Background(), services)).To(BeEquivalentTo(services[0:2]))
 				})
 			})
 		})
@@ -78,7 +79,7 @@ var _ = Describe("Flusher", func() {
 		Context("Batch size is zero value", func() {
 			It("flusher.Flush should return entire services slice", func() {
 				flusher := flusher_.New(0, repoMock)
-				Expect(flusher.Flush(services)).To(BeEquivalentTo(services))
+				Expect(flusher.Flush(context.Background(), services)).To(BeEquivalentTo(services))
 			})
 		})
 	})

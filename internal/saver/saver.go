@@ -1,6 +1,7 @@
 package saver
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"sync"
@@ -10,7 +11,7 @@ import (
 )
 
 type Flusher interface {
-	Flush(services []models.Service) []models.Service
+	Flush(ctx context.Context, services []models.Service) []models.Service
 }
 
 type Saver interface {
@@ -85,7 +86,7 @@ func (s *saver) flush() {
 		return
 	}
 
-	unsaved := s.flusher.Flush(s.localStorage)
+	unsaved := s.flusher.Flush(context.Background(), s.localStorage)
 	if len(unsaved) > 0 {
 		log.Printf("warning: some entities can't be saved to database and will be discraded: \n%v\n", unsaved)
 	}

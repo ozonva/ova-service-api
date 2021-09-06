@@ -1,6 +1,7 @@
 package saver_test
 
 import (
+	"golang.org/x/net/context"
 	"time"
 
 	"github.com/golang/mock/gomock"
@@ -49,7 +50,7 @@ var _ = Describe("Saver", func() {
 					saver := saver_.New(1, longTimeout, flusherMock)
 					saver.Init()
 
-					flusherMock.EXPECT().Flush(gomock.Any()).Times(0)
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Any()).Times(0)
 
 					_ = saver.Save(carService)
 				})
@@ -60,7 +61,7 @@ var _ = Describe("Saver", func() {
 					saver := saver_.New(1, longTimeout, flusherMock)
 					saver.Init()
 
-					flusherMock.EXPECT().Flush(gomock.Eq(gomock.Any())).Times(0)
+					flusherMock.EXPECT().Flush(gomock.Any(), gomock.Eq(gomock.Any())).Times(0)
 
 					_ = saver.Save(carService)
 					Expect(saver.Save(panzerService)).Should(HaveOccurred())
@@ -73,7 +74,7 @@ var _ = Describe("Saver", func() {
 				saver := saver_.New(1, shortTimeout, flusherMock)
 				saver.Init()
 
-				flusherMock.EXPECT().Flush(gomock.Eq([]models.Service{carService})).Times(1)
+				flusherMock.EXPECT().Flush(context.Background(), gomock.Eq([]models.Service{carService})).Times(1)
 
 				_ = saver.Save(carService)
 				time.Sleep(shortTimeout)
@@ -85,7 +86,7 @@ var _ = Describe("Saver", func() {
 				saver := saver_.New(1, longTimeout, flusherMock)
 				saver.Init()
 
-				flusherMock.EXPECT().Flush(gomock.Eq([]models.Service{carService})).Times(1)
+				flusherMock.EXPECT().Flush(context.Background(), gomock.Eq([]models.Service{carService})).Times(1)
 
 				_ = saver.Save(carService)
 				saver.Close()

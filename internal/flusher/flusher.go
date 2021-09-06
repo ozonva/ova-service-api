@@ -1,7 +1,10 @@
 package flusher
 
 import (
+	"context"
 	"log"
+
+	"github.com/opentracing/opentracing-go"
 
 	"github.com/ozonva/ova-service-api/internal/models"
 	"github.com/ozonva/ova-service-api/internal/repo"
@@ -9,7 +12,7 @@ import (
 )
 
 type Flusher interface {
-	Flush(services []models.Service) []models.Service
+	Flush(ctx context.Context, services []models.Service) []models.Service
 }
 
 func New(chunkSize uint, serviceRepo repo.Repo) Flusher {
@@ -24,7 +27,7 @@ type flusher struct {
 	serviceRepo repo.Repo
 }
 
-func (f *flusher) Flush(services []models.Service) []models.Service {
+func (f *flusher) Flush(ctx context.Context, services []models.Service) []models.Service {
 	chunks, err := utils.SplitToBulks(services, f.chunkSize)
 
 	if err != nil {
@@ -40,6 +43,17 @@ func (f *flusher) Flush(services []models.Service) []models.Service {
 		if repoErr != nil {
 			unsavedServices = append(unsavedServices, chunk...)
 			log.Printf("Services chunk #%d wasn't saved: %s\n", i, repoErr.Error())
+		}
+
+		parentSpan := opentracing.SpanFromContext(ctx)
+		if parentSpan != nil {
+			chunkSpan := opentracing.StartSpan("BulkCreate",
+				opentracing.ChildOf(parentSpan.Context()),
+				opentracing.Tag{
+					Key:   "Count",
+					Value: len(chunk),
+				})
+			chunkSpan.Finish()
 		}
 	}
 
