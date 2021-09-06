@@ -14,8 +14,8 @@ import (
 
 	"github.com/ozonva/ova-service-api/internal/api"
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
-	"github.com/ozonva/ova-service-api/internal/kafka"
-	"github.com/ozonva/ova-service-api/internal/metrics"
+	"github.com/ozonva/ova-service-api/internal/infrastructure/kafka"
+	"github.com/ozonva/ova-service-api/internal/infrastructure/metrics"
 	repo_ "github.com/ozonva/ova-service-api/internal/repo"
 	saver_ "github.com/ozonva/ova-service-api/internal/saver"
 	pb "github.com/ozonva/ova-service-api/pkg/ova-service-api"

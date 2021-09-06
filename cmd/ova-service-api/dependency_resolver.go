@@ -4,8 +4,8 @@ import (
 	"context"
 
 	flusher_ "github.com/ozonva/ova-service-api/internal/flusher"
-	"github.com/ozonva/ova-service-api/internal/kafka"
-	metrics_ "github.com/ozonva/ova-service-api/internal/metrics"
+	"github.com/ozonva/ova-service-api/internal/infrastructure/kafka"
+	metrics_ "github.com/ozonva/ova-service-api/internal/infrastructure/metrics"
 	repo_ "github.com/ozonva/ova-service-api/internal/repo"
 	saver_ "github.com/ozonva/ova-service-api/internal/saver"
 )
