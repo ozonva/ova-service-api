@@ -46,6 +46,10 @@ func (ksp SyncProducer) SendMessage(message string) error {
 }
 
 func (ksp SyncProducer) SendMessages(messages []string) error {
+	if len(messages) == 0 {
+		return nil
+	}
+
 	msgs := make([]*sarama.ProducerMessage, len(messages))
 
 	for i, message := range messages {
