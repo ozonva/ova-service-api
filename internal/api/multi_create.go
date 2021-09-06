@@ -46,6 +46,12 @@ func (s *GrpcApiServer) MultiCreateServiceV1(ctx context.Context, req *pb.MultiC
 		return nil, internalErr
 	}
 
+	// Actually this is not correct logic because Flusher possibly save some chunks of data to database,
+	// but we will produce something to Kafka only if all chunks are saved correctly. I do not handle it for now
+	// because actually overall logic of storing data in two places are handled incorrect. We may fix it with:
+	// 1. Outbox pattern.
+	// 2. Event sourcing.
+	// 3. Global transaction, but it requires that Kafka consumers should process events in an idempotent manner.
 	messages := mapServicesToMessages(services)
 	kafkaErr := s.producer.SendMessages(messages)
 	if kafkaErr != nil {
