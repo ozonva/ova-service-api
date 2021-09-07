@@ -11,4 +11,5 @@ type Repo interface {
 	ListServices(limit uint64, offset uint64) ([]models.Service, error)
 	DescribeService(serviceID uuid.UUID) (*models.Service, error)
 	RemoveService(serviceID uuid.UUID) error
+	UpdateService(service *models.Service) error
 }

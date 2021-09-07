@@ -39,6 +39,22 @@ service ServiceAPI {
       delete: "/v1/remove/{service_id}"
     };
   }
+
+  // Create multiple services
+  rpc MultiCreateServiceV1(MultiCreateServiceV1Request) returns (MultiCreateServiceV1Response) {
+    option (google.api.http) = {
+      post: "/v1/multicreate"
+      body: "*"
+    };
+  }
+
+  // Update service
+  rpc UpdateServiceV1(UpdateServiceV1Request) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/v1/update/{service_id}"
+      body: "*"
+    };
+  }
 }
 
 message CreateServiceV1Request {
@@ -80,4 +96,21 @@ message ServiceShortInfoV1Response {
 
 message RemoveServiceV1Request {
   string service_id = 1;
+}
+
+message MultiCreateServiceV1Request {
+  repeated CreateServiceV1Request create_service = 1;
+}
+
+message MultiCreateServiceV1Response {
+  repeated string service_id = 1;
+}
+
+message UpdateServiceV1Request {
+  string service_id = 1;
+  uint64 user_id = 2;
+  string description = 3;
+  string service_name = 4;
+  string service_address = 5;
+  google.protobuf.Timestamp when = 6;
 }

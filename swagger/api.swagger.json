@@ -98,6 +98,39 @@
         ]
       }
     },
+    "/v1/multicreate": {
+      "post": {
+        "summary": "Create multiple services",
+        "operationId": "ServiceAPI_MultiCreateServiceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/serviceMultiCreateServiceV1Response"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serviceMultiCreateServiceV1Request"
+            }
+          }
+        ],
+        "tags": [
+          "ServiceAPI"
+        ]
+      }
+    },
     "/v1/remove/{service_id}": {
       "delete": {
         "summary": "Remove service",
@@ -122,6 +155,45 @@
             "in": "path",
             "required": true,
             "type": "string"
+          }
+        ],
+        "tags": [
+          "ServiceAPI"
+        ]
+      }
+    },
+    "/v1/update/{service_id}": {
+      "put": {
+        "summary": "Update service",
+        "operationId": "ServiceAPI_UpdateServiceV1",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/runtimeError"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "service_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/serviceUpdateServiceV1Request"
+            }
           }
         ],
         "tags": [
@@ -234,6 +306,28 @@
         }
       }
     },
+    "serviceMultiCreateServiceV1Request": {
+      "type": "object",
+      "properties": {
+        "create_service": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/serviceCreateServiceV1Request"
+          }
+        }
+      }
+    },
+    "serviceMultiCreateServiceV1Response": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
     "serviceServiceShortInfoV1Response": {
       "type": "object",
       "properties": {
@@ -245,6 +339,31 @@
           "format": "uint64"
         },
         "service_name": {
+          "type": "string"
+        },
+        "when": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "serviceUpdateServiceV1Request": {
+      "type": "object",
+      "properties": {
+        "service_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "description": {
+          "type": "string"
+        },
+        "service_name": {
+          "type": "string"
+        },
+        "service_address": {
           "type": "string"
         },
         "when": {

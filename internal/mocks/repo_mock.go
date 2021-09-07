@@ -92,3 +92,17 @@ func (mr *MockRepoMockRecorder) RemoveService(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveService", reflect.TypeOf((*MockRepo)(nil).RemoveService), arg0)
 }
+
+// UpdateService mocks base method.
+func (m *MockRepo) UpdateService(arg0 *models.Service) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateService", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateService indicates an expected call of UpdateService.
+func (mr *MockRepoMockRecorder) UpdateService(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateService", reflect.TypeOf((*MockRepo)(nil).UpdateService), arg0)
+}

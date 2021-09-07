@@ -27,6 +27,10 @@ type ServiceAPIClient interface {
 	ListServicesV1(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListServicesV1Response, error)
 	// Remove service
 	RemoveServiceV1(ctx context.Context, in *RemoveServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error)
+	// Create multiple services
+	MultiCreateServiceV1(ctx context.Context, in *MultiCreateServiceV1Request, opts ...grpc.CallOption) (*MultiCreateServiceV1Response, error)
+	// Update service
+	UpdateServiceV1(ctx context.Context, in *UpdateServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
 type serviceAPIClient struct {
@@ -73,6 +77,24 @@ func (c *serviceAPIClient) RemoveServiceV1(ctx context.Context, in *RemoveServic
 	return out, nil
 }
 
+func (c *serviceAPIClient) MultiCreateServiceV1(ctx context.Context, in *MultiCreateServiceV1Request, opts ...grpc.CallOption) (*MultiCreateServiceV1Response, error) {
+	out := new(MultiCreateServiceV1Response)
+	err := c.cc.Invoke(ctx, "/ova.service.ServiceAPI/MultiCreateServiceV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceAPIClient) UpdateServiceV1(ctx context.Context, in *UpdateServiceV1Request, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/ova.service.ServiceAPI/UpdateServiceV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ServiceAPIServer is the server API for ServiceAPI service.
 // All implementations must embed UnimplementedServiceAPIServer
 // for forward compatibility
@@ -85,6 +107,10 @@ type ServiceAPIServer interface {
 	ListServicesV1(context.Context, *empty.Empty) (*ListServicesV1Response, error)
 	// Remove service
 	RemoveServiceV1(context.Context, *RemoveServiceV1Request) (*empty.Empty, error)
+	// Create multiple services
+	MultiCreateServiceV1(context.Context, *MultiCreateServiceV1Request) (*MultiCreateServiceV1Response, error)
+	// Update service
+	UpdateServiceV1(context.Context, *UpdateServiceV1Request) (*empty.Empty, error)
 	mustEmbedUnimplementedServiceAPIServer()
 }
 
@@ -103,6 +129,12 @@ func (UnimplementedServiceAPIServer) ListServicesV1(context.Context, *empty.Empt
 }
 func (UnimplementedServiceAPIServer) RemoveServiceV1(context.Context, *RemoveServiceV1Request) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveServiceV1 not implemented")
+}
+func (UnimplementedServiceAPIServer) MultiCreateServiceV1(context.Context, *MultiCreateServiceV1Request) (*MultiCreateServiceV1Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreateServiceV1 not implemented")
+}
+func (UnimplementedServiceAPIServer) UpdateServiceV1(context.Context, *UpdateServiceV1Request) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateServiceV1 not implemented")
 }
 func (UnimplementedServiceAPIServer) mustEmbedUnimplementedServiceAPIServer() {}
 
@@ -189,6 +221,42 @@ func _ServiceAPI_RemoveServiceV1_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ServiceAPI_MultiCreateServiceV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreateServiceV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceAPIServer).MultiCreateServiceV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.service.ServiceAPI/MultiCreateServiceV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceAPIServer).MultiCreateServiceV1(ctx, req.(*MultiCreateServiceV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ServiceAPI_UpdateServiceV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateServiceV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceAPIServer).UpdateServiceV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.service.ServiceAPI/UpdateServiceV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceAPIServer).UpdateServiceV1(ctx, req.(*UpdateServiceV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ServiceAPI_ServiceDesc is the grpc.ServiceDesc for ServiceAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -211,6 +279,14 @@ var ServiceAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveServiceV1",
 			Handler:    _ServiceAPI_RemoveServiceV1_Handler,
+		},
+		{
+			MethodName: "MultiCreateServiceV1",
+			Handler:    _ServiceAPI_MultiCreateServiceV1_Handler,
+		},
+		{
+			MethodName: "UpdateServiceV1",
+			Handler:    _ServiceAPI_UpdateServiceV1_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

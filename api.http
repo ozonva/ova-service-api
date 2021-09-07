@@ -2,11 +2,11 @@
 # Simple REST/HTTP file to test endpoints #
 ###########################################
 
+### GET all services
 GET http://localhost:8081/v1/list
 Accept: application/json
 
-###
-
+### POST request to create new service
 POST http://localhost:8081/v1/create
 Content-Type: application/json
 
@@ -18,13 +18,46 @@ Content-Type: application/json
   "when": "2022-08-31T23:55:00Z"
 }
 
-###
+### GET single service information
+GET http://localhost:8081/v1/describe/08d73d5f-29b6-4493-8ad4-8ce7d037ed79
+Accept: application/json
 
-GET http://localhost:8081/v1/remove/08d73d5f-29b6-4493-8ad4-8ce7d037ed79
-Content-Type: application/json
-
-###
-
+### DELETE service
 DELETE http://localhost:8081/v1/remove/d6fa505c-6072-4a45-bdae-86e6b13d7342
 
+### PUT request for service update
+PUT http://localhost:8081/v1/update/fdde37b8-3534-4ce6-b435-95388fc6d307
+Content-Type: application/json
+
+{
+  "service_id": "fdde37b8-3534-4ce6-b435-95388fc6d307",
+  "user_id": 1,
+  "description": "Service created with api.http",
+  "service_name": "Ferrari service",
+  "service_address": "Everywhere",
+  "when": "2021-09-29T23:55:00Z"
+}
+
+### POST request to create nultiple new services
+POST http://localhost:8081/v1/multicreate
+Content-Type: application/json
+
+{
+  "create_service": [
+    {
+      "user_id": 2,
+      "description": "Service created with api.http",
+      "service_name": "Ferrari service",
+      "service_address": "Nowhere",
+      "when": "2022-09-03T23:55:00Z"
+    },
+    {
+      "user_id": 2,
+      "description": "Service created with api.http",
+      "service_name": "Lada service",
+      "service_address": "Nowhere",
+      "when": "2022-09-03T23:55:00Z"
+    }
+  ]
+}
 ###

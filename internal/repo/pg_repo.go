@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/huandu/go-sqlbuilder"
 	_ "github.com/jackc/pgx/v4"
@@ -171,6 +172,51 @@ func (repo *PostgresServiceRepo) RemoveService(serviceID uuid.UUID) error {
 		return err
 	}
 
+	return nil
+}
+
+func (repo *PostgresServiceRepo) UpdateService(service *models.Service) error {
+	log.Debug().Msg("PostgresServiceRepo.UpdateService call")
+
+	if service == nil {
+		nilErr := fmt.Errorf("service is nil")
+		log.Err(nilErr).Msg("Error occurred during update service")
+		return nilErr
+	}
+
+	query := `UPDATE services
+			SET user_id = $1,
+			    description = $2,
+			    service_name = $3,
+			    service_address = $4,
+			    when_local = $5,
+			    when_utc = $6,
+			    updated_at = CURRENT_TIMESTAMP,
+			    version = version + 1
+			WHERE id = $7`
+
+	res, err := repo.db.ExecContext(repo.ctx, query, service.UserID, service.Description, service.ServiceName,
+		service.ServiceAddress, service.WhenLocal, service.WhenUTC, service.ID)
+
+	if err != nil {
+		log.Err(err).Msg("Error occurs during update operation execution")
+		return err
+	}
+
+	cnt, err := res.RowsAffected()
+
+	if err != nil {
+		log.Err(err).Msg("Error occurs during update operation execution")
+		return err
+	}
+
+	if cnt == 0 {
+		concurrencyErr := fmt.Errorf("service with ID: %s was not updated because entity already changed by other request", service.ID.String())
+		log.Err(concurrencyErr).Msg("Error occurs during update operation execution")
+		return concurrencyErr
+	}
+
+	log.Info().Msg("Service was successfully updated")
 	return nil
 }
 
